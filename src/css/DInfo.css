@@ -1,0 +1,18 @@
+.devInfoPop{
+    width: 300px;
+    height: 500px;
+    position: absolute;
+    top: 60px;
+    left: 0px;
+    background: #ffffff;
+    z-index: 100;
+}
+
+.devSlider{
+    width: 290px;
+    height: 20px;
+}
+
+.devInfoPop p{
+    margin-bottom: 5px;
+}

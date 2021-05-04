@@ -1,0 +1,10 @@
+button{
+    width: fit-content;
+    height: 24px;
+    padding: 2px;
+    margin: 5px;
+}
+
+button:disabled{
+    opacity: 50%;
+}
