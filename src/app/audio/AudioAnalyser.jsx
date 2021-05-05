@@ -8,7 +8,8 @@ export class AudioAnalyser extends React.Component{
         this.tick = this.tick.bind(this);
 
         this.state = {
-            audioData: new Uint8Array(0)
+            waveAudioData: new Uint8Array(0),
+            barAudioData: new Uint8Array(0)
         };
 
     }
@@ -17,7 +18,6 @@ export class AudioAnalyser extends React.Component{
     componentDidMount() {
         this.audioContext   = new (window.AudioContext || window.webkitAudioContext)();
         this.analyser       = this.audioContext.createAnalyser();
-        this.dataArray      = new Uint8Array(this.analyser.frequencyBinCount);
         this.source         = this.audioContext.createMediaStreamSource(this.props.audio);
         this.gain           = this.audioContext.createGain();
 
@@ -29,9 +29,21 @@ export class AudioAnalyser extends React.Component{
 
     tick(){
         this.gain.gain.setValueAtTime(this.props.micSensitivity, this.audioContext.currentTime);
-        this.analyser.getByteTimeDomainData(this.dataArray);
-        this.setState({audioData: this.dataArray});
-        this.props.sendAudioData(this.dataArray);
+
+        //waveform data
+        this.analyser.fftSize = this.props.configData.waveFFT;
+        this.waveDataArray    = new Uint8Array(this.analyser.frequencyBinCount);
+        this.analyser.getByteTimeDomainData(this.waveDataArray);
+        this.setState({waveAudioData: this.waveDataArray});
+        this.props.sendAudioData(this.waveDataArray, true);
+
+        //frequency data
+        this.analyser.fftSize = this.props.configData.barFFT;
+        this.barDataArray     = new Uint8Array(this.analyser.frequencyBinCount);
+        this.analyser.getByteFrequencyData(this.barDataArray);
+        this.setState({barAudioData: this.barDataArray});
+        this.props.sendAudioData(this.barDataArray, false);
+
         this.rafId = requestAnimationFrame(this.tick);
     }
 

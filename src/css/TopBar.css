@@ -23,6 +23,10 @@
     transition: fill 200ms;
 }
 
+.logo svg{
+    margin-top: 6px;
+}
+
 .iconsTop {
     height: 100%;
     width: 100%;

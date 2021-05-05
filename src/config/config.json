@@ -1,5 +1,15 @@
 { "interface":
   { "durationFadeOut": 5000
+  },
+
+  "settings":
+  { "partyMode": false
+
+  },
+
+  "audioAnalyser":
+  { "waveFFT": 2048,
+    "barFFT":  256
 
   }
 

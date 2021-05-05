@@ -9,12 +9,15 @@ import {Settings}           from './interface/Settings';
 import {AudioAnalyser}      from './audio/AudioAnalyser';
 import {Background}         from './interface/Background';
 import {DevelopInfo}        from './interface/DevelopInfo';
+import {BarVisualizer}      from './audio/BarVisualizer';
 
 // config
 import config               from '../config/config.json';
 
 // link the configuration data
-const config_duration_fadeOut = config.interface.durationFadeOut;
+const config_duration_fadeOut   = config.interface.durationFadeOut;
+const config_audio_data         = config.audioAnalyser;
+const config_settings           = config.settings;
 
 
 export class App extends React.PureComponent {
@@ -29,7 +32,8 @@ export class App extends React.PureComponent {
 
             //Audio parameter
             audio:              null,
-            audioData:          new Uint8Array(0),
+            waveAudioData:      new Uint8Array(0),
+            barAudioData:       new Uint8Array(0),
             micSensitivity:     1,
 
             //Visuals parameter
@@ -95,10 +99,16 @@ export class App extends React.PureComponent {
     }
 
     // Global Audio
-    setAudioData(audioData){
-        this.setState({
-            audioData: audioData
-        });
+    setAudioData(audioData, wave){
+        if(wave){
+            this.setState({
+                waveAudioData: audioData
+            });
+        }else{
+            this.setState({
+                barAudioData: audioData
+            });
+        }
     }
 
 
@@ -120,7 +130,7 @@ export class App extends React.PureComponent {
                     toggleMic       = {() => this.toggleMicrophone()}
                 />
                 <BottomBar
-                    audioData       = {this.state.audioData}
+                    audioData       = {this.state.waveAudioData}
                     audio           = {this.state.audio}
                 />
 
@@ -136,12 +146,23 @@ export class App extends React.PureComponent {
                 structureSize   = {this.state.structureSize}
             />
 
-            {this.state.audio ? <AudioAnalyser
-                                    audio={this.state.audio}
-                                    sendAudioData={(data) => this.setAudioData(data)}
-                                    micSensitivity = {this.state.micSensitivity}
-                                /> : ''}
+
+            {this.state.audio ? <div>
+                                <AudioAnalyser
+                                    audio           = {this.state.audio}
+                                    sendAudioData   = {(data, wave) => this.setAudioData(data, wave)}
+                                    micSensitivity  = {this.state.micSensitivity}
+                                    configData      = {config_audio_data}
+                                />
+                                <BarVisualizer
+                                    className       = "barVisualiser"
+                                    audioData       = {this.state.barAudioData}
+                                />
+                                </div>
+
+                                : ''}
             <Background/>
+
 
         </div>
 
