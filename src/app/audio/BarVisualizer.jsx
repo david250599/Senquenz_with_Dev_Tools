@@ -10,11 +10,11 @@ export class BarVisualizer extends React.Component{
         this.highPassArray = [0, 0];
 
         this.state = {
-            lowPassAvg: 0,
-            highPassAvg: 0,
-            overallAvg: 0,
-            lowMax: 0,
-            highMax: 0
+            lowPassAvg:     0,
+            highPassAvg:    0,
+            overallAvg:     0,
+            lowMax:         0,
+            highMax:        0
         }
     }
 
@@ -42,16 +42,16 @@ export class BarVisualizer extends React.Component{
             x += barWidth + 1;
         }
         if (audioData.length > 0){
-            const  intervalLength   = Math.floor(audioData.length/2);
-            this.lowPassArray     = audioData.slice(0, intervalLength);
-            this.highPassArray    = audioData.slice(intervalLength+1, audioData.length-1);
+            const intervalLength   = Math.floor(audioData.length/2);
+            this.lowPassArray      = audioData.slice(0, intervalLength);
+            this.highPassArray     = audioData.slice(intervalLength+1, audioData.length-1);
 
-            this.lowPassAvg       = this.lowPassArray.reduce(function(a, b){ return a +b})/this.lowPassArray.length
-            this.highPassAvg      = this.highPassArray.reduce(function(a, b){ return a +b})/this.highPassArray.length
-            this.overallAvg       = audioData.reduce(function(a, b){ return a +b})/audioData.length
+            this.lowPassAvg        = this.lowPassArray.reduce(function(a, b){ return a +b})/this.lowPassArray.length
+            this.highPassAvg       = this.highPassArray.reduce(function(a, b){ return a +b})/this.highPassArray.length
+            this.overallAvg        = audioData.reduce(function(a, b){ return a +b})/audioData.length
 
-            this.lowMax           = this.lowPassArray.reduce(function(a, b){ return Math.max(a , b);});
-            this.highMax          = this.highPassArray.reduce(function(a, b){ return Math.max(a , b);});
+            this.lowMax            = this.lowPassArray.reduce(function(a, b){ return Math.max(a , b);});
+            this.highMax           = this.highPassArray.reduce(function(a, b){ return Math.max(a , b);});
         }
 
         if (this.lowPassAvg > this.state.lowPassAvg){

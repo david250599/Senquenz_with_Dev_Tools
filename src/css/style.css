@@ -50,6 +50,12 @@ h6{
     height: 0;
 }
 
+.visualsContainer{
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
 .barVisualiser{
     position: absolute;
     top: 50px;

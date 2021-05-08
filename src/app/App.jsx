@@ -11,6 +11,8 @@ import {Background}         from './interface/Background';
 import {DevelopInfo}        from './interface/DevelopInfo';
 import {BarVisualizer}      from './audio/BarVisualizer';
 
+import {VisualsRoot}        from './visuals/VisualsRoot';
+
 // config
 import config               from '../config/config.json';
 
@@ -134,8 +136,11 @@ export class App extends React.PureComponent {
                     audio           = {this.state.audio}
                 />
 
-
             </div>
+            <div className="visualsContainer">
+                <VisualsRoot/>
+            </div>
+
             <DevelopInfo
                 eventHandler    = {(event) => this.handleInputEvent(event)}
                 intensity       = {this.state.intensity}
@@ -145,7 +150,6 @@ export class App extends React.PureComponent {
                 urban           = {this.state.urban}
                 structureSize   = {this.state.structureSize}
             />
-
 
             {this.state.audio ? <div>
                                 <AudioAnalyser
