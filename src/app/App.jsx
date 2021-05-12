@@ -31,6 +31,7 @@ export class App extends React.PureComponent {
         this.state = {
             visibleSettings:    false,
             visibleInterface:   true,
+            visibleVisuals:     false,
 
             //Audio parameter
             audio:              null,
@@ -39,21 +40,44 @@ export class App extends React.PureComponent {
             micSensitivity:     1,
 
             //Visuals parameter
-            intensity:          0.0,
-            brightness:         0.0,
-            hilly:              0.0,
-            water:              0.0,
-            urban:              0.0,
-            structureSize:      0.0
+            visualsParameter: {
+                intensity:          0.5,
+                brightness:         0.0,
+                hilly:              0.5,
+                water:              0.5,
+                urban:              0.5,
+                structureSize:      0.5,
+                speed:              0.5
+            },
+
+            visualsMount:       true
 
         };
     }
 
     // Update state after Input
-    handleInputEvent(event){
+    handleDevEvent(event){
+        if(event.target.type === 'range'){
+            this.setState(prevState => {
+                let visualsParameter = Object.assign({}, prevState.visualsParameter);
+                visualsParameter[event.target.name] = parseFloat(event.target.value);
+                return {visualsParameter};
+            })
+        }
+
+        //Vorläufig
+        if (event.target.name === 'update'){
             this.setState({
-                [event.target.name]: event.target.value
-            });
+                visualsMount: !this.state.visualsMount
+            })
+        }
+    }
+
+    //Settings
+    handleInputEvent(event){
+        this.setState({
+            [event.target.name]: event.target.value
+        })
     }
 
     // open & close the settings sidebar
@@ -137,18 +161,24 @@ export class App extends React.PureComponent {
                 />
 
             </div>
-            <div className="visualsContainer">
-                <VisualsRoot/>
-            </div>
+
+            {this.state.visualsMount?
+                                <VisualsRoot
+                                    className           = "visualsRoot"
+                                    visualsParameter    = {this.state.visualsParameter}
+                                />
+                                : ''}
 
             <DevelopInfo
-                eventHandler    = {(event) => this.handleInputEvent(event)}
-                intensity       = {this.state.intensity}
-                brightness      = {this.state.brightness}
-                hilly           = {this.state.hilly}
-                water           = {this.state.water}
-                urban           = {this.state.urban}
-                structureSize   = {this.state.structureSize}
+                eventHandler    = {(event) => this.handleDevEvent(event)}
+                intensity       = {this.state.visualsParameter.intensity}
+                brightness      = {this.state.visualsParameter.brightness}
+                hilly           = {this.state.visualsParameter.hilly}
+                water           = {this.state.visualsParameter.water}
+                urban           = {this.state.visualsParameter.urban}
+                structureSize   = {this.state.visualsParameter.structureSize}
+                visualsMount    = {this.state.visualsParameter.visualsMount}
+                speed           = {this.state.visualsParameter.speed}
             />
 
             {this.state.audio ? <div>

@@ -11,6 +11,14 @@
   { "waveFFT": 2048,
     "barFFT":  256
 
+  },
+
+  "visuals":
+  {
+    "scene1":
+    { "maxObjects": 30
+
+    }
   }
 
 }

@@ -2,63 +2,121 @@ import React, { useRef, useMemo}    from 'react';
 import {useFrame}                   from '@react-three/fiber';
 import * as THREE                   from 'three';
 
+export function Scene1(props) {
 
-export function Scene1(){
-    const ref = useRef();
 
-    const { vec, transform, positions, distances } = useMemo(() => {
-        const vec           = new THREE.Vector3();
-        const transform     = new THREE.Matrix4();
-        const positions     = [...Array(10000)].map((_, i) => {
-            const position  = new THREE.Vector3();
 
-            //Grid
-            position.x      = (i % 100) - 50;
-            position.y      = Math.floor(i / 100) - 50;
 
-            //Offset every 2. column
-            position.y      += (i % 2) * 0.5;
+    const backColor = new THREE.Color(1, 1, 1);
+    const frontColor = new THREE.Color(0, 0, 0);
 
-            //Add some noise
-            position.x      += Math.random() * 0.3;
-            position.y      += Math.random() * 0.3;
+    const moveVec = new THREE.Vector3();
+    let speed = props.visualsParameter.speed;
+
+
+
+
+    const backObjects = useRef();
+    const frontObjects = useRef();
+
+    const {vec, transform, positions, directions, objectAmount, objectSize, spacing, vertices} = useMemo(() => {
+        const vec = new THREE.Vector3();
+        const transform = new THREE.Matrix4();
+        const objectAmount  = props.visualsParameter.structureSize*1200 + 20;
+        const objectSize    = -props.visualsParameter.structureSize * 20 +22;
+        const spacing       = -props.visualsParameter.urban *8 +8 + (objectSize*2 - objectSize/5);
+        const vertices = Math.floor(-props.visualsParameter.hilly * 30 +27);
+
+        let moveX = -150;
+        let moveY =-70;
+        console.log('memo');
+
+
+        const positions = [...Array(objectAmount)].map((_, i) => {
+            const position = new THREE.Vector3();
+
+
+            position.x = moveX;
+            position.y = moveY;
+
+            moveX = moveX + spacing;
+
+            if(moveX > 150){
+                moveX = -150;
+                moveY = moveY + spacing;
+            }
+
             return position
         });
-        const distances = positions.map(pos => pos.length())
 
-        return {vec, transform, positions, distances}
+        const directions = 0;
+
+        return {vec, transform, positions, directions, objectAmount, objectSize, spacing, vertices}
     }, []);
 
-    useFrame(({clock}) => {
 
-        for (let i = 0; i < 10000; ++i){
-            const t = clock.elapsedTime - distances[i] / 80;
-            const wave = roundedSquareWave(t, 0.1, 1, 1 /3);
-            const scale = 1 + wave * 0.3;
+
+
+    useFrame(() => {
+
+
+        for (let i = 0; i < positions.length; ++i) {
             vec.copy(positions[i]);
-            vec.multiplyScalar(scale);
             transform.setPosition(vec);
-            ref.current.setMatrixAt(i, transform);
+            frontObjects.current.setMatrixAt(i, transform);
+
+
+            vec.add(moveVec);
+            transform.setPosition(vec);
+            backObjects.current.setMatrixAt(i, transform);
 
         }
-        ref.current.instanceMatrix.needsUpdate = true;
+
+        if(moveVec.x >= spacing || moveVec.x <= 0){
+            moveVec.y += speed;
+        }
+        if(moveVec.y >= spacing || moveVec.y <= 0){
+            moveVec.x += speed;
+        }
+
+
+        if((moveVec.x >= spacing && moveVec.y >= spacing) || (moveVec.x <=0 && moveVec.y <=0)){
+            speed = -speed;
+        }
+
+
+
+
+
+
+
+
+
+
+
+        backObjects.current.instanceMatrix.needsUpdate = true;
+        frontObjects.current.instanceMatrix.needsUpdate = true;
 
 
     });
 
-    const roundedSquareWave = (t, delta, a, f) => {
-        return ((2 * a) / Math.PI) * Math.atan(Math.sin(2 * Math.PI * t * f) / delta)
-    }
+    return (
+        <group>
+            <instancedMesh
+                ref={backObjects}
+                args={[null, null, objectAmount]}>
+                <circleBufferGeometry args={[objectSize, vertices]}/>
+                <meshBasicMaterial color={backColor}/>
+            </instancedMesh>
+            <instancedMesh
+                ref={frontObjects}
+                args={[null, null, objectAmount]}>
+                <circleBufferGeometry args={[objectSize/3, vertices]}/>
+                <meshBasicMaterial color={frontColor}/>
+            </instancedMesh>
+        </group>
 
-
-
-    return(
-        <instancedMesh
-            ref={ref}
-            args={[null, null, 10000]}>
-            <circleBufferGeometry args={[0.15]}/>
-            <meshBasicMaterial/>
-        </instancedMesh>
     )
-
 }
+
+
