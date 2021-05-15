@@ -12,6 +12,7 @@ import {DevelopInfo}        from './interface/DevelopInfo';
 import {BarVisualizer}      from './audio/BarVisualizer';
 
 import {VisualsRoot}        from './visuals/VisualsRoot';
+import {Map}                from './interface/Map';
 
 // config
 import config               from '../config/config.json';
@@ -180,6 +181,8 @@ export class App extends React.PureComponent {
                 visualsMount    = {this.state.visualsParameter.visualsMount}
                 speed           = {this.state.visualsParameter.speed}
             />
+
+            <Map/>
 
             {this.state.audio ? <div>
                                 <AudioAnalyser

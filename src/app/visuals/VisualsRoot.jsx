@@ -18,9 +18,10 @@ export class VisualsRoot extends React.Component{
         return(
             <Canvas className={this.props.className} perspective camera={{ zoom: 0.08 }} colorManagement={false}>
                 <color attach="background" args={[this.brightness, this.brightness, this.brightness]} />
-                <Scene1 visualsParameter = {this.props.visualsParameter}/>
+
                 <Effects/>
                 <TestScene visualsParameter ={this.props.visualsParameter}/>
+                <Scene1 visualsParameter = {this.props.visualsParameter}/>
 
 
             </Canvas>

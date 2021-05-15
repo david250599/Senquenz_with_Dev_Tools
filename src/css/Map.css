@@ -1,0 +1,52 @@
+.map{
+    width: 800px;
+    height: 400px;
+    position: absolute;
+    left: 0;
+    top: 450px;
+    z-index: 100;
+}
+
+.mapContainer{
+    height: 100%;
+    width: 100%;
+}
+
+.map p{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: black;
+    color: white;
+    z-index: 101;
+}
+
+.mapboxgl-control-container{
+    display: none;
+}
+
+.mapButton{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 101;
+}
+
+.getDataButton{
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 101;
+}
+
+.marker{
+    background: white;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-5px, -5px);
+    z-index: 101;
+}
