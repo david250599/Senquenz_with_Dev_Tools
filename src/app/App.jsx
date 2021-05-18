@@ -12,15 +12,17 @@ import {DevelopInfo}        from './interface/DevelopInfo';
 import {BarVisualizer}      from './audio/BarVisualizer';
 
 import {VisualsRoot}        from './visuals/VisualsRoot';
-import {Map}                from './interface/Map';
 
 // config
 import config               from '../config/config.json';
 
+
 // link the configuration data
+const config_interface          = config.interface;
 const config_duration_fadeOut   = config.interface.durationFadeOut;
 const config_audio_data         = config.audioAnalyser;
 const config_settings           = config.settings;
+const config_map                = config_settings.mapSettings;
 
 
 export class App extends React.PureComponent {
@@ -30,15 +32,30 @@ export class App extends React.PureComponent {
         this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), config_duration_fadeOut);
 
         this.state = {
-            visibleSettings:    false,
-            visibleInterface:   true,
-            visibleVisuals:     false,
+            visibleSettings:    config_interface.visibleSettings,
+            visibleInterface:   config_interface.visibleInterface,
+            visibleVisuals:     config_interface.visibleVisuals,
+
+            //Settings
+            microphoneInput:    config_settings.microphoneInput,
+            autoSensitivity:    config_settings.autoSensitivity,
+            locationDetection:  config_settings.locationDetection,
+            partyMode:          config_settings.partyMode,
+            projectionMode:     config_settings.projectionMode,
+
+            //Location
+            currentLocation: {
+                lat:            Math.random() * config_map.maxLat*2 - config_map.maxLat,
+                lng:            Math.random() * config_map.maxLng*2 - config_map.maxLng,
+                zoom:           config_map.zoomStart
+            },
+            map:                null,
 
             //Audio parameter
             audio:              null,
             waveAudioData:      new Uint8Array(0),
             barAudioData:       new Uint8Array(0),
-            micSensitivity:     1,
+            micSensitivity:     config_audio_data.micSensitivity,
 
             //Visuals parameter
             visualsParameter: {
@@ -76,17 +93,43 @@ export class App extends React.PureComponent {
 
     //Settings
     handleInputEvent(event){
-        this.setState({
-            [event.target.name]: event.target.value
-        })
+        if (event.target.type === 'checkbox'){
+            if (event.target.name === 'microphoneInput'){
+                if (this.state.audio){
+                    this.stopMicrophone();
+                } else {
+                    this.getMicrophone();
+                }
+            }else if (event.target.name === 'locationDetection'){
+                if(event.target.checked){
+                    this.getUserLocation();
+                }else{
+                    this.setState({
+                        locationDetection: false
+                    })
+                }
+
+            }else{
+                this.setState({
+                    [event.target.name] : event.target.checked
+                })
+            }
+        }
+
+        if(event.target.type === 'range'){
+            this.setState({
+                [event.target.name]: event.target.value
+            })
+        }
+
     }
 
     // open & close the settings sidebar
-    openSettings(){
-        this.setState({ visibleSettings: true })
-    }
-    closeSettings(){
-        this.setState({ visibleSettings: false })
+    toggleSettings(){
+        this.setState(prevState =>{
+            let visibleSettings = !prevState.visibleSettings;
+            return {visibleSettings}
+        })
     }
 
     // Hide the interface when mouse does not move for a certain amount of time
@@ -106,23 +149,23 @@ export class App extends React.PureComponent {
         this.setState({ visibleInterface: true });
     }
 
+
     // Get audio input and handle microphone button
     async getMicrophone(){
         const audio = await navigator.mediaDevices.getUserMedia({
             audio: true
         });
-        this.setState({ audio });
+        this.setState({
+            audio:              audio,
+            microphoneInput:    true
+        });
     }
     stopMicrophone(){
         this.state.audio.getTracks().forEach(track => track.stop());
-        this.setState({ audio: null});
-    }
-    toggleMicrophone(){
-        if (this.state.audio){
-            this.stopMicrophone();
-        } else {
-            this.getMicrophone();
-        }
+        this.setState({
+            audio:              null,
+            microphoneInput:    false
+        });
     }
 
     // Global Audio
@@ -138,6 +181,67 @@ export class App extends React.PureComponent {
         }
     }
 
+    // Global Location Data
+    setLocation(lat, lng, zoom){
+        this.setState({
+            currentLocation: {lat, lng, zoom}
+        });
+    }
+
+    getMap(map){
+        this.setState({
+            map: map
+        })
+    }
+
+    getUserLocation(){
+        navigator.geolocation.getCurrentPosition(position => {
+            this.setState({
+                locationDetection: true,
+                currentLocation: {
+                    lat:    position.coords.latitude,
+                    lng:    position.coords.longitude,
+                    zoom:   config_map.zoomSearch
+
+                }
+            });
+            if(this.state.map){
+                this.state.map.setCenter([position.coords.longitude, position.coords.latitude]);
+                this.state.map.setZoom(config_map.zoomSearch);
+            }
+
+        }, error => {
+            alert('Could not get current location, '  + error.code + ': ' + error.message);
+        });
+    }
+
+
+    /*
+    async getGeoData(){
+        let query = 'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v8/tilequery/' + this.state.lng + ',' + this.state.lat + '.json?' +
+            'radius=1000&limit=50&dedupe&access_token=' + mapboxgl.accessToken;
+
+        let response = await fetch(query);
+
+        if(response.ok){
+            let data = await response.json();
+            let allFeatures = data.features
+            console.log(allFeatures);
+
+            let elevations = [];
+
+            for(let i = 0; i<allFeatures.length; i++){
+                elevations.push(allFeatures[i].properties.ele);
+            }
+            console.log(elevations);
+
+        }else{
+            alert('HTTP-Error: ' + response.status + ', Could not load geodata');
+        }
+
+    }
+*/
+
 
   render(){
     return (
@@ -145,20 +249,32 @@ export class App extends React.PureComponent {
             <div className="interface" id={this.state.visibleInterface ? null : 'fadeOut'}>
 
                 <TopBar
-                    openSettings    = {() => this.openSettings()}
+                    openSettings        = {() => this.toggleSettings()}
                 />
 
                 <Settings
-                    closeSettings   = {() => this.closeSettings()}
-                    visible         = {this.state.visibleSettings}
-                    audio           = {this.state.audio}
-                    micSensitivity  = {this.state.micSensitivity}
-                    eventHandler    = {(event) => this.handleInputEvent(event)}
-                    toggleMic       = {() => this.toggleMicrophone()}
+                    config              = {config_settings}
+                    visible             = {this.state.visibleSettings}
+
+                    microphoneInput     = {this.state.microphoneInput}
+                    audio               = {this.state.audio}
+                    autoSensitivity     = {this.state.autoSensitivity}
+                    micSensitivity      = {this.state.micSensitivity}
+
+                    locationDetection   = {this.state.locationDetection}
+                    currentLocation     = {this.state.currentLocation}
+                    setLocation         = {(la, ln, z) => this.setLocation(la, ln, z)}
+                    getMap              = {(map) => this.getMap(map)}
+
+                    partyMode           = {this.state.partyNode}
+                    projectionMode      = {this.state.projectionMode}
+
+                    closeSettings       = {() => this.toggleSettings()}
+                    eventHandler        = {(event) => this.handleInputEvent(event)}
                 />
                 <BottomBar
-                    audioData       = {this.state.waveAudioData}
-                    audio           = {this.state.audio}
+                    audioData           = {this.state.waveAudioData}
+                    audio               = {this.state.audio}
                 />
 
             </div>
@@ -181,8 +297,6 @@ export class App extends React.PureComponent {
                 visualsMount    = {this.state.visualsParameter.visualsMount}
                 speed           = {this.state.visualsParameter.speed}
             />
-
-            <Map/>
 
             {this.state.audio ? <div>
                                 <AudioAnalyser

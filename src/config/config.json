@@ -1,16 +1,43 @@
 { "interface":
-  { "durationFadeOut": 5000
+  { "durationFadeOut":    5000,
+    "visibleSettings":    false,
+    "visibleInterface":   true,
+    "visibleVisuals":     false
   },
 
   "settings":
-  { "partyMode": false
+  { "microphoneInput":    false,
+    "autoSensitivity":    true,
+    "sliderSen":
+    { "min":              0.1,
+      "max":              4,
+      "step":             0.1
+    },
+    "locationDetection":  false,
+    "partyMode":          false,
+    "projectionMode":     false,
+    "mapSettings":
+    { "token":              "pk.eyJ1IjoiZGFpdmQta2FpcGYiLCJhIjoiY2tvb21qamlzMGNtajJybnUwM2gwdGY1ZiJ9.aKH_sjgP0MYLTaGIWV_wPQ",
+      "style":              "mapbox://styles/mapbox/light-v10",
+      "zoomStart":          2,
+      "zoomSearch":         14,
+      "maxLat":             90,
+      "maxLng":             180,
+      "queryTerrain":       "https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/",
+      "queryStreets":       "https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/",
+      "filterLineRoad":     ".json?radius=1000&limit=50&geometry=linestring&layers=road&access_token=",
+      "filterPolyBuilding": ".json?radius=1000&limit=50&geometry=polygon&layers=building&access_token=",
+      "filterPolyLand":     ".json?radius=1000&limit=50&geometry=polygon&layers=landuse&access_token=",
+      "filterPolyWater":    ".json?radius=1000&limit=50&dedupe&geometry=polygon&layers=water&access_token=",
+      "filterPolyContour":  ".json?radius=1000&limit=50&dedupe&geometry=polygon&layers=contour&access_token="
+    }
 
   },
 
   "audioAnalyser":
-  { "waveFFT": 2048,
-    "barFFT":  256
-
+  { "waveFFT":        2048,
+    "barFFT":         256,
+    "micSensitivity": 1
   },
 
   "visuals":

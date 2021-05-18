@@ -2,70 +2,13 @@ import React                            from 'react';
 import                                       '../../css/Settings.css';
 import {ToggleSwitch}                   from './ToggleSwitch';
 import {Slider}                         from './Slider';
-import {TextInput}                      from './TextInput';
+import {Map}                            from './Map';
 import {ReactComponent as SvgCross}     from '../../img/cross.svg';
 import {ReactComponent as SvgFqHigh}    from '../../img/frequenz_high.svg';
 import {ReactComponent as SvgFqLow}     from '../../img/frequenz_low.svg';
+import {Button} from "./Button";
 
 export class Settings extends React.PureComponent{
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            microphoneState:    false,
-            autoSensitivity:    true,
-            geoData:            false,
-            searchLocation:     'search location',
-            partyMode:          false,
-            projectionMode:     false
-        };
-    }
-
-    handleChange(event){
-
-        if(event.target.name === 'autoSensitivity'){
-            this.setState({
-                [event.target.name]: event.target.checked
-            });
-            console.log(event.target.name + ' ' + event.target.checked);
-        }
-
-
-        if(event.target.name === 'geoData'){
-            this.setState({
-                [event.target.name]: event.target.checked
-            });
-            console.log(event.target.name + ' ' + event.target.checked);
-        }
-
-        if(event.target.name === 'searchLocation'){
-            this.setState({
-                [event.target.name]: event.target.value
-            });
-            console.log(event.target.name);
-        }
-
-        if(event.target.name === 'partyMode'){
-            this.setState({
-                [event.target.name]: event.target.checked
-            });
-            console.log(event.target.name + ' ' + event.target.checked);
-        }
-
-        if(event.target.name === 'projectionMode'){
-            this.setState({
-                [event.target.name]: event.target.checked
-            });
-            console.log(event.target.name + ' ' + event.target.checked);
-        }
-
-    }
-
-    deleteInput(event){
-        this.setState({
-            [event.target.name]: ''
-        });
-    }
 
     render() {
         return(
@@ -77,27 +20,27 @@ export class Settings extends React.PureComponent{
                 <ToggleSwitch
                     className   = "switchContainer"
                     id          = "micSwitch"
-                    title       = { this.props.audio ? 'Stop microphone' : 'Get microphone input' }
-                    name        = "microphoneSwitch"
-                    checked     = { !!this.props.audio }
-                    onChange    = {this.props.toggleMic}
-
+                    title       = { this.props.microphoneInput ? 'Stop microphone' : 'Get microphone input' }
+                    name        = "microphoneInput"
+                    checked     = { this.props.microphoneInput }
+                    onChange    = {(event) => this.props.eventHandler(event)}
                 />
                 <ToggleSwitch
                     className   = "switchContainer"
                     id          = "senSwitch"
                     title       = "Automatic adjustment"
                     name        = "autoSensitivity"
-                    checked     = {this.state.autoSensitivity}
-                    onChange    = {(event) => this.handleChange(event)}
+                    checked     = {this.props.autoSensitivity}
+                    onChange    = {(event) => this.props.eventHandler(event)}
                 />
                 <SvgFqLow className="iconLow"/>
                 <Slider
                     className   = "sliderContainer"
                     id          = "senSlider"
-                    min         = "0"
-                    max         = "4"
-                    step        = "0.1"
+                    disabled    = {!!this.props.autoSensitivity}
+                    min         = {this.props.config.sliderSen.min}
+                    max         = {this.props.config.sliderSen.max}
+                    step        = {this.props.config.sliderSen.step}
                     name        = "micSensitivity"
                     value       = {this.props.micSensitivity}
                     onChange    = {(event) => this.props.eventHandler(event)}
@@ -109,18 +52,28 @@ export class Settings extends React.PureComponent{
                     className   = "switchContainer"
                     id          = "geoSwitch"
                     title       = "Location detection"
-                    name        = "geoData"
-                    checked     = {this.state.geoData}
-                    onChange    = {(event) => this.handleChange(event)}
+                    name        = "locationDetection"
+                    checked     = {this.props.locationDetection}
+                    onChange    = {(event) => this.props.eventHandler(event)}
                 />
-                <TextInput
-                    className   = "inputContainer"
-                    id          = "geoInput"
-                    name        = "searchLocation"
-                    value       = {this.state.searchLocation}
-                    onChange    = {(event) => this.handleChange(event)}
-                    onClick     = {(event) => this.deleteInput(event)}
+
+                {this.props.locationDetection?          <div className="hideMap"/> : ''}
+                {this.props.locationDetection? '' :     <Button
+                                                                className = "buttonSetLocation"
+                                                                name      = "SET LOCATION"
+
+
+                                                        />}
+
+                <Map
+                    className           = "locationMap"
+                    mapToken            = {this.props.config.mapSettings.token}
+                    mapStyle            = {this.props.config.mapSettings.style}
+                    getMap              = {(map) => this.props.getMap(map)}
+                    currentLocation     = {this.props.currentLocation}
+                    setLocation         = {(la, ln, z) => this.props.setLocation(la, ln, z)}
                 />
+
 
                 <h5 id="catVisuals">Visuals</h5>
                 <ToggleSwitch
@@ -128,16 +81,16 @@ export class Settings extends React.PureComponent{
                     id          = "partySwitch"
                     title       = "Party mode"
                     name        = "partyMode"
-                    checked     = {this.state.partyMode}
-                    onChange    = {(event) => this.handleChange(event)}
+                    checked     = {this.props.partyMode}
+                    onChange    = {(event) => this.props.eventHandler(event)}
                 />
                 <ToggleSwitch
                     className   = "switchContainer"
                     id          = "prjSwitch"
                     title       = "Projection mode"
                     name        = "projectionMode"
-                    checked     = {this.state.projectionMode}
-                    onChange    = {(event) => this.handleChange(event)}
+                    checked     = {this.props.projectionMode}
+                    onChange    = {(event) => this.props.eventHandler(event)}
                 />
 
 
