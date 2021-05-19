@@ -20,9 +20,9 @@
 
 .mapboxgl-ctrl{
     position:       absolute;
-    width:          330px;
+    width:          334px;
     font-size:      10px;
-    transform:      translate(0, -5px);
+    transform:      translate(-2px, -2px);
     background:     black;
     text-align:     center;
 

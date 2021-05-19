@@ -1,5 +1,5 @@
 import React from 'react';
-import            '../../css/Button.css';
+import            '../../../css/component/Button.css';
 
 export class Button extends React.PureComponent{
 
@@ -7,8 +7,9 @@ export class Button extends React.PureComponent{
         return(
             <button
                 className   = {this.props.className}
+                id          = {this.props.id}
                 disabled    = {this.props.disabled}
-                onClick     = {() => this.props.onClick()}>
+                onClick     = {(event) => this.props.onClick(event)}>
                 {this.props.name}
             </button>
         )

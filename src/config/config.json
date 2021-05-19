@@ -1,5 +1,5 @@
 { "interface":
-  { "durationFadeOut":    5000,
+  { "durationFadeOut":    10000,
     "visibleSettings":    false,
     "visibleInterface":   true,
     "visibleVisuals":     false

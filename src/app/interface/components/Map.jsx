@@ -1,5 +1,5 @@
-import React from 'react';
-import '../../css/Map.css';
+import React    from 'react';
+import               '../../../css/component/Map.css';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import mapboxgl from '!mapbox-gl';
 
@@ -41,13 +41,13 @@ export class Map extends React.PureComponent {
 
     render() {
         return(
-            <div className={this.props.className}>
-                <div className="marker"/>
-                <p className="mapInfo"> {this.props.currentLocation.lng.toFixed(2) + ', ' +
+            <div className = {this.props.className} id = {this.props.id}>
+                <div className = "marker"/>
+                <p className = "mapInfo"> {this.props.currentLocation.lng.toFixed(2) + ', ' +
                      this.props.currentLocation.lat.toFixed(2) + ', '+
                      this.props.currentLocation.zoom.toFixed(2)}
                 </p>
-                <div ref={this.mapContainer} className="mapContainer" />
+                <div ref = {this.mapContainer} className = "mapContainer" />
             </div>
 
         )

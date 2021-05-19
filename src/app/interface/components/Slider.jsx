@@ -1,5 +1,5 @@
 import React    from 'react';
-import               '../../css/Slider.css';
+import               '../../../css/component/Slider.css';
 
 export class Slider extends React.PureComponent{
 

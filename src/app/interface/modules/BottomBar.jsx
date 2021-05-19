@@ -1,10 +1,10 @@
 import React                            from 'react';
-import                                       '../../css/BottomBar.css';
+import                                       '../../../css/module/BottomBar.css';
 
-import {ReactComponent as SvgPlay}      from '../../img/play.svg';
-import {ReactComponent as SvgUpVote}    from '../../img/upvote.svg';
-import {ReactComponent as SvgDownVote}  from '../../img/downvote.svg';
-import {WaveformVisualizer}             from '../audio/WaveformVisualizer';
+import {ReactComponent as SvgPlay}      from '../../../img/play.svg';
+import {ReactComponent as SvgUpVote}    from '../../../img/upvote.svg';
+import {ReactComponent as SvgDownVote}  from '../../../img/downvote.svg';
+import {WaveformVisualizer}             from '../../audio/WaveformVisualizer';
 
 export class BottomBar extends React.Component{
 
@@ -32,16 +32,16 @@ export class BottomBar extends React.Component{
 
     render() {
         return(
-            <div className="bottomBar">
-                <div className="gradientBottom">
-                    <div className="iconsBottom">
-                    <div className="downVote"><SvgDownVote/></div>
-                    <div className="play"><SvgPlay/></div>
-                    <div className="upVote"><SvgUpVote/></div>
+            <div className = "bottomBar">
+                <div className = "gradientBottom">
+                    <div className = "iconsBottom">
+                    <div className = "downVote"><SvgDownVote/></div>
+                    <div className = "play"><SvgPlay/></div>
+                    <div className = "upVote"><SvgUpVote/></div>
                 </div>
                 </div>
 
-                <div className="frequency" ref={(input) => { this.frequency = input; }}>
+                <div className = "frequency" ref={(input) => { this.frequency = input; }}>
                     {this.props.audio ?
                         <WaveformVisualizer audioData   ={this.state.audioData}
                                             width       ={this.frequency.clientWidth}

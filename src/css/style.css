@@ -16,7 +16,7 @@ body{
     overflow:           hidden;
 }
 
-h4, h5, h6{
+h4, h5, h6, p{
     font-weight:    normal;
 }
 
@@ -30,6 +30,10 @@ h5{
 
 h6{
     font-size:      22px;
+}
+
+p{
+    font-size:      16px;
 }
 
 .rootContainer{
@@ -63,7 +67,7 @@ h6{
     position:   absolute;
     top:        50px;
     left:       300px;
-    z-index:    90;
+    z-index:    20;
 }
 
 

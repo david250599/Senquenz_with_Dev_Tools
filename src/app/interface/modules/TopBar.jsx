@@ -1,10 +1,10 @@
 import React                                from 'react';
-import                                           '../../css/TopBar.css';
+import                                           '../../../css/module/TopBar.css';
 
-import {ReactComponent as SvgLogo}          from '../../img/logo.svg';
-import {ReactComponent as SvgSettings}      from '../../img/settings.svg';
-import {ReactComponent as SvgShare}         from '../../img/share.svg';
-import {ReactComponent as SvgFullScreen}    from '../../img/fullscreen.svg';
+import {ReactComponent as SvgLogo}          from '../../../img/logo.svg';
+import {ReactComponent as SvgSettings}      from '../../../img/settings.svg';
+import {ReactComponent as SvgShare}         from '../../../img/share.svg';
+import {ReactComponent as SvgFullScreen}    from '../../../img/fullscreen.svg';
 
 export class TopBar extends React.PureComponent{
 

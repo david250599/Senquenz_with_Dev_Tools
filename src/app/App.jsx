@@ -3,18 +3,18 @@ import                           '../css/style.css';
 
 
 //React Components
-import {TopBar}             from './interface/TopBar';
-import {BottomBar}          from './interface/BottomBar';
-import {Settings}           from './interface/Settings';
+import {TopBar}             from './interface/modules/TopBar';
+import {BottomBar}          from './interface/modules/BottomBar';
+import {Settings}           from './interface/modules/Settings';
 import {AudioAnalyser}      from './audio/AudioAnalyser';
-import {Background}         from './interface/Background';
-import {DevelopInfo}        from './interface/DevelopInfo';
+import {DevelopInfo}        from './interface/modules/DevelopInfo';
 import {BarVisualizer}      from './audio/BarVisualizer';
 
 import {VisualsRoot}        from './visuals/VisualsRoot';
 
 // config
 import config               from '../config/config.json';
+import {StartScreen} from "./interface/modules/StartScreen";
 
 
 // link the configuration data
@@ -32,6 +32,7 @@ export class App extends React.PureComponent {
         this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), config_duration_fadeOut);
 
         this.state = {
+            start:              false,
             visibleSettings:    config_interface.visibleSettings,
             visibleInterface:   config_interface.visibleInterface,
             visibleVisuals:     config_interface.visibleVisuals,
@@ -68,12 +69,12 @@ export class App extends React.PureComponent {
                 speed:              0.5
             },
 
-            visualsMount:       true
+            visualsMount:       false
 
         };
     }
 
-    // Update state after Input
+    // Remove later, only Dev
     handleDevEvent(event){
         if(event.target.type === 'range'){
             this.setState(prevState => {
@@ -89,6 +90,12 @@ export class App extends React.PureComponent {
                 visualsMount: !this.state.visualsMount
             })
         }
+    }
+
+    start(){
+        this.setState({
+            start: true
+        })
     }
 
     //Settings
@@ -246,6 +253,17 @@ export class App extends React.PureComponent {
   render(){
     return (
         <div className="rootContainer" onMouseMove={(event) => this.handleMouseEvent(event)}>
+
+            {this.state.start? '' :
+                <StartScreen
+                    start                   = {() => this.start()}
+                    microphoneInput         = {this.state.microphoneInput}
+                    locationDetection       = {this.state.locationDetection}
+                    eventHandler            = {(event) => this.handleInputEvent(event)}
+
+                />
+            }
+
             <div className="interface" id={this.state.visibleInterface ? null : 'fadeOut'}>
 
                 <TopBar
@@ -286,6 +304,8 @@ export class App extends React.PureComponent {
                                 />
                                 : ''}
 
+
+
             <DevelopInfo
                 eventHandler    = {(event) => this.handleDevEvent(event)}
                 intensity       = {this.state.visualsParameter.intensity}
@@ -312,7 +332,6 @@ export class App extends React.PureComponent {
                                 </div>
 
                                 : ''}
-            <Background/>
 
 
         </div>

@@ -1,0 +1,40 @@
+.dialog{
+    width:          560px;
+    height:         230px;
+
+    position:       absolute;
+    top:            50%;
+    left:           50%;
+    transform:      translate(-280px, -115px);
+
+    background:     white;
+    border-radius:  8px;
+    filter:         drop-shadow(0 3px 6px rgba(0,0,0,0.2) );
+
+    display:        grid;
+    grid-template-columns:  24px auto 24px;
+    grid-template-rows:     64px repeat(3, 56px);
+}
+
+.dialog * {
+    grid-column:    2 / 3;
+}
+
+.dialog h4{
+    grid-row:       1 / 2;
+    align-self:     center;
+}
+
+.dialog p {
+    grid-row:       2 / 3;
+}
+
+.dialogSwitch{
+    grid-row:       3 / 4;
+    align-self:     center;
+}
+
+.dialogButton{
+    grid-row:       4 / 5;
+    justify-self:   end;
+}

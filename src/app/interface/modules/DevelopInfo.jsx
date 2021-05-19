@@ -1,6 +1,6 @@
 import React from 'react';
-import '../../css/DInfo.css';
-import {Slider} from './Slider';
+import '../../../css/DInfo.css';
+import {Slider} from '../components/Slider';
 
 export class DevelopInfo extends React.Component{
 

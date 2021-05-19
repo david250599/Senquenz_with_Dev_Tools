@@ -1,22 +1,25 @@
 import React                            from 'react';
-import                                       '../../css/Settings.css';
-import {ToggleSwitch}                   from './ToggleSwitch';
-import {Slider}                         from './Slider';
-import {Map}                            from './Map';
-import {ReactComponent as SvgCross}     from '../../img/cross.svg';
-import {ReactComponent as SvgFqHigh}    from '../../img/frequenz_high.svg';
-import {ReactComponent as SvgFqLow}     from '../../img/frequenz_low.svg';
-import {Button} from "./Button";
+import                                       '../../../css/module/Settings.css';
+
+import {ToggleSwitch}                   from '../components/ToggleSwitch';
+import {Slider}                         from '../components/Slider';
+import {Map}                            from '../components/Map';
+import {Button}                         from '../components/Button';
+
+import {ReactComponent as SvgCross}     from '../../../img/cross.svg';
+import {ReactComponent as SvgFqHigh}    from '../../../img/frequenz_high.svg';
+import {ReactComponent as SvgFqLow}     from '../../../img/frequenz_low.svg';
+
 
 export class Settings extends React.PureComponent{
 
     render() {
         return(
-            <div className="sidebar" id={this.props.visible ? "open" : null}>
-                <SvgCross id="closeIcon" onClick={this.props.closeSettings}/>
+            <div className = "sidebar" id={this.props.visible ? "open" : null}>
+                <SvgCross id = "closeIcon" onClick={this.props.closeSettings}/>
                 <h4>Settings</h4>
 
-                <h5 id="catAudio">Audio</h5>
+                <h5 id = "catAudio">Audio</h5>
                 <ToggleSwitch
                     className   = "switchContainer"
                     id          = "micSwitch"
@@ -33,7 +36,7 @@ export class Settings extends React.PureComponent{
                     checked     = {this.props.autoSensitivity}
                     onChange    = {(event) => this.props.eventHandler(event)}
                 />
-                <SvgFqLow className="iconLow"/>
+                <SvgFqLow className = "iconLow"/>
                 <Slider
                     className   = "sliderContainer"
                     id          = "senSlider"
@@ -47,7 +50,7 @@ export class Settings extends React.PureComponent{
                 />
                 <SvgFqHigh className="iconHigh"/>
 
-                <h5 id="catGeodata">Geodata</h5>
+                <h5 id = "catGeodata">Geodata</h5>
                 <ToggleSwitch
                     className   = "switchContainer"
                     id          = "geoSwitch"
@@ -61,12 +64,11 @@ export class Settings extends React.PureComponent{
                 {this.props.locationDetection? '' :     <Button
                                                                 className = "buttonSetLocation"
                                                                 name      = "SET LOCATION"
-
-
                                                         />}
 
                 <Map
                     className           = "locationMap"
+                    id                  = {this.props.locationDetection? 'locationSet': null}
                     mapToken            = {this.props.config.mapSettings.token}
                     mapStyle            = {this.props.config.mapSettings.style}
                     getMap              = {(map) => this.props.getMap(map)}
@@ -75,7 +77,7 @@ export class Settings extends React.PureComponent{
                 />
 
 
-                <h5 id="catVisuals">Visuals</h5>
+                <h5 id = "catVisuals">Visuals</h5>
                 <ToggleSwitch
                     className   = "switchContainer"
                     id          = "partySwitch"

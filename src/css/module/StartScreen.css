@@ -1,0 +1,41 @@
+.startScreen{
+    width:      100%;
+    height:     100%;
+    position:   absolute;
+    left:       0;
+    top:        0;
+    background: white;
+    z-index:    200;
+}
+
+.opener{
+    position:   absolute;
+    width:      560px;
+    height:     230px;
+    left:       50%;
+    top:        50%;
+    transform:  translate(-280px, -115px);
+
+}
+
+.opener p{
+    text-align: center;
+    transform:  translate(0, -20px);
+}
+
+.openerButton{
+    position:   absolute;
+    left:       50%;
+    transform:  translate(-65px, 0);
+}
+
+.background{
+    width:      100%;
+    height:     100%;
+    position:   absolute;
+    left:       0;
+    top:        0;
+    z-index:    -1;
+
+    filter:     blur(10px);
+}
