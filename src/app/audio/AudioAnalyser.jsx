@@ -5,11 +5,13 @@ export class AudioAnalyser extends React.Component{
     constructor(props) {
         super(props);
 
-        this.tick = this.tick.bind(this);
+        this.tick         = this.tick.bind(this);
+        this.maxValues    = [0];
+        this.updateGain   = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
 
-        this.state = {
-            waveAudioData: new Uint8Array(0),
-            barAudioData: new Uint8Array(0)
+        this.state      = {
+            waveAudioData:  new Uint8Array(0),
+            barAudioData:   new Uint8Array(0),
         };
 
     }
@@ -23,6 +25,7 @@ export class AudioAnalyser extends React.Component{
 
         this.source.connect(this.gain);
         this.gain.connect(this.analyser);
+
 
         this.rafId = requestAnimationFrame(this.tick);
     }
@@ -44,17 +47,37 @@ export class AudioAnalyser extends React.Component{
         this.setState({barAudioData: this.barDataArray});
         this.props.sendAudioData(this.barDataArray, false);
 
+        this.maxValues.push(this.barDataArray[2]);
+
         this.rafId = requestAnimationFrame(this.tick);
+    }
+
+    checkGain(){
+        window.clearTimeout(this.updateGain);
+
+        if(this.props.autoSensitivity){
+            let max = Math.max(...this.maxValues);
+            if(max > this.props.configData.frequencyTopLimit){
+                this.props.adjustSensitivity(this.props.configData.adjustStep * -1);
+            }else if(max < this.props.configData.frequencyLowLimit){
+                this.props.adjustSensitivity(this.props.configData.adjustStep);
+            }
+        }
+        this.maxValues = [0];
+        this.updateGain   = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
     }
 
     componentWillUnmount() {
         cancelAnimationFrame(this.rafId);
+        this.gain.disconnect();
         this.analyser.disconnect();
         this.source.disconnect();
+        window.clearTimeout(this.updateGain);
     }
 
     render() {
         return '';
     }
+
 
 }

@@ -6,7 +6,7 @@ import * as THREE                   from 'three';
 export function TestScene(props){
     const ref = useRef();
 
-    const speed = props.visualsParameter.speed;
+    const speed = 0.2;
 
 
 
@@ -61,7 +61,7 @@ export function TestScene(props){
         <instancedMesh
             ref={ref}
             args={[null, null, 10000]}>
-            <circleBufferGeometry args={[props.visualsParameter.structureSize, props.visualsParameter.hilly*20]}/>
+            <circleBufferGeometry args={[0.2, 30]}/>
             <meshBasicMaterial/>
         </instancedMesh>
     )

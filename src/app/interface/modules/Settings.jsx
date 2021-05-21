@@ -64,6 +64,7 @@ export class Settings extends React.PureComponent{
                 {this.props.locationDetection? '' :     <Button
                                                                 className = "buttonSetLocation"
                                                                 name      = "SET LOCATION"
+                                                                onClick   = {()=> this.props.getGeoData()}
                                                         />}
 
                 <Map

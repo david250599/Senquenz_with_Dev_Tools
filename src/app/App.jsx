@@ -1,5 +1,6 @@
 import React                from 'react';
 import                           '../css/style.css';
+import SunCalc              from 'suncalc';
 
 
 //React Components
@@ -9,46 +10,47 @@ import {Settings}           from './interface/modules/Settings';
 import {AudioAnalyser}      from './audio/AudioAnalyser';
 import {DevelopInfo}        from './interface/modules/DevelopInfo';
 import {BarVisualizer}      from './audio/BarVisualizer';
+import {StartScreen}        from './interface/modules/StartScreen';
 
 import {VisualsRoot}        from './visuals/VisualsRoot';
 
 // config
 import config               from '../config/config.json';
-import {StartScreen} from "./interface/modules/StartScreen";
-
 
 // link the configuration data
-const config_interface          = config.interface;
-const config_duration_fadeOut   = config.interface.durationFadeOut;
-const config_audio_data         = config.audioAnalyser;
-const config_settings           = config.settings;
-const config_map                = config_settings.mapSettings;
+const c_interface          = config.interface;
+const c_duration_fadeOut   = config.interface.durationFadeOut;
+const c_audio_data         = config.audioAnalyser;
+const c_settings           = config.settings;
+const c_map                = c_settings.mapSettings;
+const c_data_mapping       = config.geoDataMapping;
 
 
 export class App extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), config_duration_fadeOut);
+        this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
+        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
 
         this.state = {
             start:              false,
-            visibleSettings:    config_interface.visibleSettings,
-            visibleInterface:   config_interface.visibleInterface,
-            visibleVisuals:     config_interface.visibleVisuals,
+            visibleSettings:    c_interface.visibleSettings,
+            visibleInterface:   c_interface.visibleInterface,
+            visibleVisuals:     c_interface.visibleVisuals,
 
             //Settings
-            microphoneInput:    config_settings.microphoneInput,
-            autoSensitivity:    config_settings.autoSensitivity,
-            locationDetection:  config_settings.locationDetection,
-            partyMode:          config_settings.partyMode,
-            projectionMode:     config_settings.projectionMode,
+            microphoneInput:    c_settings.microphoneInput,
+            autoSensitivity:    c_settings.autoSensitivity,
+            locationDetection:  c_settings.locationDetection,
+            partyMode:          c_settings.partyMode,
+            projectionMode:     c_settings.projectionMode,
 
             //Location
             currentLocation: {
-                lat:            Math.random() * config_map.maxLat*2 - config_map.maxLat,
-                lng:            Math.random() * config_map.maxLng*2 - config_map.maxLng,
-                zoom:           config_map.zoomStart
+                lat:            Math.random() * c_map.maxLat*2 - c_map.maxLat,
+                lng:            Math.random() * c_map.maxLng*2 - c_map.maxLng,
+                zoom:           c_map.zoomStart
             },
             map:                null,
 
@@ -56,17 +58,15 @@ export class App extends React.PureComponent {
             audio:              null,
             waveAudioData:      new Uint8Array(0),
             barAudioData:       new Uint8Array(0),
-            micSensitivity:     config_audio_data.micSensitivity,
+            micSensitivity:     c_audio_data.micSensitivity,
 
             //Visuals parameter
             visualsParameter: {
-                intensity:          0.5,
                 brightness:         0.0,
                 hilly:              0.5,
                 water:              0.5,
                 urban:              0.5,
                 structureSize:      0.5,
-                speed:              0.5
             },
 
             visualsMount:       false
@@ -92,7 +92,8 @@ export class App extends React.PureComponent {
         }
     }
 
-    start(){
+    async start(){
+        await this.getGeoData();
         this.setState({
             start: true
         })
@@ -125,7 +126,7 @@ export class App extends React.PureComponent {
 
         if(event.target.type === 'range'){
             this.setState({
-                [event.target.name]: event.target.value
+                [event.target.name]: parseFloat(event.target.value)
             })
         }
 
@@ -143,7 +144,7 @@ export class App extends React.PureComponent {
     handleMouseEvent(event){
         this.showInterface();
         window.clearTimeout(this.fadeOutInterface);
-        this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), config_duration_fadeOut);
+        this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
     }
 
     // Show and hide the interface components
@@ -175,7 +176,7 @@ export class App extends React.PureComponent {
         });
     }
 
-    // Global Audio
+    // Global audio
     setAudioData(audioData, wave){
         if(wave){
             this.setState({
@@ -188,19 +189,33 @@ export class App extends React.PureComponent {
         }
     }
 
-    // Global Location Data
+    // Adjust the mic sensitivity
+    adjustMicSensitivity(value){
+        let newValue = this.state.micSensitivity + value;
+
+        if (newValue >= c_settings.sliderSen.min && newValue <= c_settings.sliderSen.max){
+            console.log('Adjust!: '+ newValue);
+            this.setState({
+                micSensitivity: newValue
+            })
+        }
+    }
+
+    // Global location aata
     setLocation(lat, lng, zoom){
         this.setState({
             currentLocation: {lat, lng, zoom}
         });
     }
 
+    // Global Map
     getMap(map){
         this.setState({
             map: map
         })
     }
 
+    // Get current user location
     getUserLocation(){
         navigator.geolocation.getCurrentPosition(position => {
             this.setState({
@@ -208,46 +223,156 @@ export class App extends React.PureComponent {
                 currentLocation: {
                     lat:    position.coords.latitude,
                     lng:    position.coords.longitude,
-                    zoom:   config_map.zoomSearch
+                    zoom:   c_map.zoomSearch
 
                 }
-            });
+            }, this.getGeoData);
             if(this.state.map){
                 this.state.map.setCenter([position.coords.longitude, position.coords.latitude]);
-                this.state.map.setZoom(config_map.zoomSearch);
+                this.state.map.setZoom(c_map.zoomSearch);
             }
 
         }, error => {
             alert('Could not get current location, '  + error.code + ': ' + error.message);
-        });
+        }, {enableHighAccuracy: true});
     }
 
 
-    /*
+
     async getGeoData(){
-        let query = 'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v8/tilequery/' + this.state.lng + ',' + this.state.lat + '.json?' +
-            'radius=1000&limit=50&dedupe&access_token=' + mapboxgl.accessToken;
+        window.clearTimeout(this.updateGeoData);
+        console.log("getGeoData");
 
-        let response = await fetch(query);
+        // Get position of sun for brightness parameter
+        let brightness;
+        let currentDate     = new Date();
+        let currentTime  = currentDate.getHours()*60 + currentDate.getMinutes();
 
-        if(response.ok){
-            let data = await response.json();
-            let allFeatures = data.features
-            console.log(allFeatures);
+        let times           = SunCalc.getTimes(currentDate, this.state.currentLocation.lat, this.state.currentLocation.lng);
+        let sunrise         = times.sunrise.getHours() * 60 + times.sunrise.getMinutes();
+        let sunsetStart     = times.sunsetStart.getHours() * 60 + times.sunsetStart.getMinutes();
+        let sunPeak         = ((sunsetStart - sunrise + 60 ) / 2) + sunrise + 60;
 
-            let elevations = [];
+        // Boundaries for the daily routine
+        let sunriseStart    = sunrise;
+        let sunriseEnd      = sunrise + 60;
+        let morningEnd      = sunPeak - 120;
+        let middayEnd       = sunPeak + 120;
+        let afternoonEnd    = sunsetStart;
+        let sunsetEnd       = sunsetStart + 60;
 
-            for(let i = 0; i<allFeatures.length; i++){
-                elevations.push(allFeatures[i].properties.ele);
-            }
-            console.log(elevations);
+        // Map it to the right value
+        if(currentTime >= sunriseStart && currentTime <= sunriseEnd){
+            //Sunrise
+            brightness = this.projectValToInterval(currentTime,sunriseStart, sunriseEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax / 2);
+
+        }else if(currentTime > sunriseEnd && currentTime <= morningEnd){
+            //Morning
+            brightness = this.projectValToInterval(currentTime,sunriseEnd, morningEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+
+        }else if(currentTime > morningEnd && currentTime <= middayEnd){
+            //Midday
+            brightness = c_data_mapping.visualsValMax;
+
+        }else if(currentTime > middayEnd && currentTime <= afternoonEnd){
+            //Afternoon
+            brightness = this.projectValToInterval(currentTime,middayEnd, afternoonEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+
+        }else if(currentTime > afternoonEnd && currentTime <= sunsetEnd){
+            //Sunset
+            brightness = this.projectValToInterval(currentTime,afternoonEnd, sunsetEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
 
         }else{
-            alert('HTTP-Error: ' + response.status + ', Could not load geodata');
+            //Night
+            brightness = c_data_mapping.visualsValMin;
         }
 
+        // Get Information for hilly, urban, water & structureSize parameters
+        //Setup url for TileQueryAPI
+        let streetQuery     =   c_map.queryStreets + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
+        let terrainQuery    =   c_map.queryTerrain + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
+
+        let buildingQuery   =   streetQuery + c_map.filterPolyBuilding + c_map.token;
+        let waterQuery      =   streetQuery + c_map.filterPolyWater + c_map.token;
+        let roadQuery       =   streetQuery + c_map.filterLineRoad + c_map.token;
+        let contourQuery    =   terrainQuery + c_map.filterPolyContour + c_map.token;
+
+        let queryArray      = [buildingQuery, waterQuery, roadQuery, contourQuery];
+
+        // For parameter mapping
+        let parameter       = [];
+
+        for (let i = 0; i< queryArray.length; i++) {
+            let response = await fetch(queryArray[i]);
+            if(response.ok){
+                let data = await response.json();
+                let allFeatures = data.features;
+                let density         = [0,0,0,0];
+
+                // calculate density
+                if(allFeatures.length > 0){
+                    let distances = [];
+
+                    // Get all distances
+                    allFeatures.forEach(feature => {
+                        distances.push(feature.properties.tilequery.distance)
+                    });
+
+                    // Get maximum distance
+                    let max = Math.max(...distances);
+                    if (max <= 0){
+                        max = 1;
+                    }
+
+                    // calculate density
+                    density[i] = allFeatures.length / max;
+                    }
+
+                // Get rid of to high and to low values by setting dem to min or max
+                // The Value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5 - research
+                // The water Value needs special treatment, because of the less value count it gets multiplied by 100
+                if(i === 1 ){
+                    density[i] = density[i] * c_data_mapping.balancingWater
+                }
+                if(density[i] < c_data_mapping.queryValMin){
+                    density[i] = c_data_mapping.queryValMin;
+                }else if(density[i] > c_data_mapping.queryValMax){
+                    density[i] = c_data_mapping.queryValMax;
+                }
+
+                // Map to geo-parameter from 0.01 to 1
+                parameter.push(this.projectValToInterval(density[i],
+                                                         c_data_mapping.queryValMin,
+                                                         c_data_mapping.queryValMax,
+                                                         c_data_mapping.visualsValMin,
+                                                         c_data_mapping.visualsValMax));
+
+            }else{
+                alert('HTTP-Error: ' + response.status + ', Could not load geodata');
+            }
+        }
+
+        this.setState({
+            visualsParameter: {
+                brightness:         brightness.toFixed(3),
+                urban:              parameter[0].toFixed(3),
+                water:              parameter[1].toFixed(3),
+                structureSize:      parameter[2].toFixed(3),
+                hilly:              parameter[3].toFixed(3)
+            }
+        });
+
+        //Call again in 5min
+        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
     }
-*/
+
+
+    projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax){
+        let m = (newMax - newMin)/(oldMax - oldMin);
+        let n = - ( m * oldMin ) + newMin;
+        return oldVal * m +n;
+    }
+
 
 
   render(){
@@ -271,7 +396,7 @@ export class App extends React.PureComponent {
                 />
 
                 <Settings
-                    config              = {config_settings}
+                    config              = {c_settings}
                     visible             = {this.state.visibleSettings}
 
                     microphoneInput     = {this.state.microphoneInput}
@@ -282,6 +407,7 @@ export class App extends React.PureComponent {
                     locationDetection   = {this.state.locationDetection}
                     currentLocation     = {this.state.currentLocation}
                     setLocation         = {(la, ln, z) => this.setLocation(la, ln, z)}
+                    getGeoData          = {() => this.getGeoData()}
                     getMap              = {(map) => this.getMap(map)}
 
                     partyMode           = {this.state.partyNode}
@@ -320,10 +446,12 @@ export class App extends React.PureComponent {
 
             {this.state.audio ? <div>
                                 <AudioAnalyser
-                                    audio           = {this.state.audio}
-                                    sendAudioData   = {(data, wave) => this.setAudioData(data, wave)}
-                                    micSensitivity  = {this.state.micSensitivity}
-                                    configData      = {config_audio_data}
+                                    audio               = {this.state.audio}
+                                    sendAudioData       = {(data, wave) => this.setAudioData(data, wave)}
+                                    autoSensitivity     = {this.state.autoSensitivity}
+                                    micSensitivity      = {this.state.micSensitivity}
+                                    adjustSensitivity   = {(value) => this.adjustMicSensitivity(value)}
+                                    configData          = {c_audio_data}
                                 />
                                 <BarVisualizer
                                     className       = "barVisualiser"
