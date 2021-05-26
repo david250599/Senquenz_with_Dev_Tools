@@ -16,6 +16,7 @@ import {VisualsRoot}        from './visuals/VisualsRoot';
 
 // config
 import config               from '../config/config.json';
+import {NoFiber} from "./visuals/NoFiber";
 
 // link the configuration data
 const c_interface          = config.interface;
@@ -24,6 +25,7 @@ const c_audio_data         = config.audioAnalyser;
 const c_settings           = config.settings;
 const c_map                = c_settings.mapSettings;
 const c_data_mapping       = config.geoDataMapping;
+const c_visuals_data       = config.visuals;
 
 
 export class App extends React.PureComponent {
@@ -69,7 +71,8 @@ export class App extends React.PureComponent {
                 structureSize:      0.5,
             },
 
-            visualsMount:       false
+            visualsMount:       false,
+            speed:              c_visuals_data.speed
 
         };
     }
@@ -77,11 +80,18 @@ export class App extends React.PureComponent {
     // Remove later, only Dev
     handleDevEvent(event){
         if(event.target.type === 'range'){
-            this.setState(prevState => {
-                let visualsParameter = Object.assign({}, prevState.visualsParameter);
-                visualsParameter[event.target.name] = parseFloat(event.target.value);
-                return {visualsParameter};
-            })
+            if(event.target.name === 'speed'){
+                this.setState({
+                    speed: parseFloat(event.target.value)
+                })
+            }else{
+                this.setState(prevState => {
+                    let visualsParameter = Object.assign({}, prevState.visualsParameter);
+                    visualsParameter[event.target.name] = parseFloat(event.target.value);
+                    return {visualsParameter};
+                })
+            }
+
         }
 
         //Vorläufig
@@ -141,7 +151,7 @@ export class App extends React.PureComponent {
     }
 
     // Hide the interface when mouse does not move for a certain amount of time
-    handleMouseEvent(event){
+    handleMouseEvent(){
         this.showInterface();
         window.clearTimeout(this.fadeOutInterface);
         this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
@@ -177,14 +187,16 @@ export class App extends React.PureComponent {
     }
 
     // Global audio
-    setAudioData(audioData, wave){
+    setAudioData(audioData, wave, speed){
+       let newSpeed = this.projectValToInterval(speed, c_audio_data.min, c_audio_data.max, 0.01, 1);
         if(wave){
             this.setState({
-                waveAudioData: audioData
+                waveAudioData:  audioData
             });
         }else{
             this.setState({
-                barAudioData: audioData
+                barAudioData:   audioData,
+                speed:          newSpeed.toFixed(2)
             });
         }
     }
@@ -377,7 +389,7 @@ export class App extends React.PureComponent {
 
   render(){
     return (
-        <div className="rootContainer" onMouseMove={(event) => this.handleMouseEvent(event)}>
+        <div className="rootContainer" onMouseMove={() => this.handleMouseEvent()}>
 
             {this.state.start? '' :
                 <StartScreen
@@ -427,8 +439,14 @@ export class App extends React.PureComponent {
                                 <VisualsRoot
                                     className           = "visualsRoot"
                                     visualsParameter    = {this.state.visualsParameter}
+                                    speed               = {this.state.speed}
                                 />
                                 : ''}
+
+            <NoFiber className = "visualsRoot"
+                     visualsParameter    = {this.state.visualsParameter}
+                     speed               = {this.state.speed}
+            />
 
 
 
@@ -441,13 +459,13 @@ export class App extends React.PureComponent {
                 urban           = {this.state.visualsParameter.urban}
                 structureSize   = {this.state.visualsParameter.structureSize}
                 visualsMount    = {this.state.visualsParameter.visualsMount}
-                speed           = {this.state.visualsParameter.speed}
+                speed           = {this.state.speed}
             />
 
             {this.state.audio ? <div>
                                 <AudioAnalyser
                                     audio               = {this.state.audio}
-                                    sendAudioData       = {(data, wave) => this.setAudioData(data, wave)}
+                                    sendAudioData       = {(data, wave, speed) => this.setAudioData(data, wave, speed)}
                                     autoSensitivity     = {this.state.autoSensitivity}
                                     micSensitivity      = {this.state.micSensitivity}
                                     adjustSensitivity   = {(value) => this.adjustMicSensitivity(value)}

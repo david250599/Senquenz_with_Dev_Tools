@@ -41,6 +41,7 @@ export class BarVisualizer extends React.Component{
 
             x += barWidth + 1;
         }
+        /*
         if (audioData.length > 0){
             const intervalLength   = Math.floor(audioData.length/2);
             this.lowPassArray      = audioData.slice(0, intervalLength);
@@ -81,6 +82,8 @@ export class BarVisualizer extends React.Component{
                 highMax: this.highMax
             })
         }
+        */
+
 
 
     }
@@ -96,9 +99,11 @@ export class BarVisualizer extends React.Component{
                     width="800"
                     ref={this.canvas}
                 />
+                {/*}
                 <p>{'low: ' + this.state.lowPassAvg + ', max: ' + this.state.lowMax}</p>
                 <p>{'high: ' + this.state.highPassAvg + ', max: ' + this.state.highMax}</p>
                 <p>{'all: ' + this.state.overallAvg}</p>
+                {*/}
 
                 </div>
 

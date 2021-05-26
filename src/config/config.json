@@ -51,7 +51,9 @@
     "updateDuration":       4000,
     "frequencyTopLimit":    240,
     "frequencyLowLimit":    170,
-    "adjustStep":           0.1
+    "adjustStep":           0.1,
+    "min":                  0,
+    "max":                  255
   },
 
   "visuals":
@@ -59,7 +61,8 @@
     "scene1":
     { "maxObjects": 30
 
-    }
+    },
+    "speed":        0.5
   }
 
 }

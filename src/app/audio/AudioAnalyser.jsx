@@ -5,11 +5,13 @@ export class AudioAnalyser extends React.Component{
     constructor(props) {
         super(props);
 
-        this.tick         = this.tick.bind(this);
-        this.maxValues    = [0];
-        this.updateGain   = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
+        this.tick               = this.tick.bind(this);
+        this.maxValuesGain      = [0];
+        this.speed              = 1;
+        this.oldAvg             = 0;
+        this.updateGain         = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
 
-        this.state      = {
+        this.state = {
             waveAudioData:  new Uint8Array(0),
             barAudioData:   new Uint8Array(0),
         };
@@ -45,9 +47,35 @@ export class AudioAnalyser extends React.Component{
         this.barDataArray     = new Uint8Array(this.analyser.frequencyBinCount);
         this.analyser.getByteFrequencyData(this.barDataArray);
         this.setState({barAudioData: this.barDataArray});
-        this.props.sendAudioData(this.barDataArray, false);
 
-        this.maxValues.push(this.barDataArray[2]);
+        // Map lower frequency to speed
+        let i = 0;
+        this.barDataArray.forEach(element => {
+            if(element === null && i < 3){
+                this.arrayisNull = true;
+            }
+            i++;
+        })
+
+        if(!this.arrayisNull){
+            let newAvg = (this.barDataArray[0] + this.barDataArray[1] + this.barDataArray[2])/3;
+            this.arrayisNull = false;
+
+            if(newAvg - this.oldAvg > 60){
+                this.speed = newAvg;
+            }else if(this.speed > 10) {
+                this.speed -= 10;
+            }
+
+            this.oldAvg = newAvg;
+        }
+
+
+        // Send Values to main component
+        this.props.sendAudioData(this.barDataArray, false, this.speed);
+
+        // Automatic adjustment
+        this.maxValuesGain.push(this.barDataArray[2]);
 
         this.rafId = requestAnimationFrame(this.tick);
     }
@@ -56,14 +84,14 @@ export class AudioAnalyser extends React.Component{
         window.clearTimeout(this.updateGain);
 
         if(this.props.autoSensitivity){
-            let max = Math.max(...this.maxValues);
+            let max = Math.max(...this.maxValuesGain);
             if(max > this.props.configData.frequencyTopLimit){
                 this.props.adjustSensitivity(this.props.configData.adjustStep * -1);
             }else if(max < this.props.configData.frequencyLowLimit){
                 this.props.adjustSensitivity(this.props.configData.adjustStep);
             }
         }
-        this.maxValues = [0];
+        this.maxValuesGain = [0];
         this.updateGain   = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
     }
 

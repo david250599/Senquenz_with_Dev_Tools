@@ -6,8 +6,7 @@ import * as THREE                   from 'three';
 export function TestScene(props){
     const ref = useRef();
 
-    const speed = 0.2;
-
+    let speed = props.speed;
 
 
     const { vec, transform, positions, distances } = useMemo(() => {

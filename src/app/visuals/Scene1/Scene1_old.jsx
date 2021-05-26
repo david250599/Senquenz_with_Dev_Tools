@@ -19,7 +19,7 @@ export function Scene1_old(props) {
     const backObjects = useRef();
     const frontObjects = useRef();
 
-    const {vec, transform, positions, directions, objectAmount, objectSize, spacing, vertices} = useMemo(() => {
+    const {vec, transform, positions, objectAmount, objectSize, spacing, vertices} = useMemo(() => {
         const vec = new THREE.Vector3();
         const transform = new THREE.Matrix4();
         const objectAmount  = props.visualsParameter.structureSize*1200 + 20;
@@ -49,9 +49,8 @@ export function Scene1_old(props) {
             return position
         });
 
-        const directions = 0;
 
-        return {vec, transform, positions, directions, objectAmount, objectSize, spacing, vertices}
+        return {vec, transform, positions, objectAmount, objectSize, spacing, vertices}
     }, []);
 
 
