@@ -11,12 +11,10 @@ import {AudioAnalyser}      from './audio/AudioAnalyser';
 import {DevelopInfo}        from './interface/modules/DevelopInfo';
 import {BarVisualizer}      from './audio/BarVisualizer';
 import {StartScreen}        from './interface/modules/StartScreen';
-
 import {VisualsRoot}        from './visuals/VisualsRoot';
 
 // config
 import config               from '../config/config.json';
-import {NoFiber} from "./visuals/NoFiber";
 
 // link the configuration data
 const c_interface          = config.interface;
@@ -72,7 +70,8 @@ export class App extends React.PureComponent {
             },
 
             visualsMount:       false,
-            speed:              c_visuals_data.speed
+            speed:              c_visuals_data.speed,
+            avg:                0
 
         };
     }
@@ -187,8 +186,9 @@ export class App extends React.PureComponent {
     }
 
     // Global audio
-    setAudioData(audioData, wave, speed){
-       let newSpeed = this.projectValToInterval(speed, c_audio_data.min, c_audio_data.max, 0.01, 1);
+    setAudioData(audioData, wave, speed, avg){
+       let newSpeed = this.projectValToInterval(speed, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+       let newAVG   = this.projectValToInterval(avg, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
         if(wave){
             this.setState({
                 waveAudioData:  audioData
@@ -196,7 +196,8 @@ export class App extends React.PureComponent {
         }else{
             this.setState({
                 barAudioData:   audioData,
-                speed:          newSpeed.toFixed(2)
+                speed:          newSpeed.toFixed(2),
+                avg:            newAVG
             });
         }
     }
@@ -268,19 +269,30 @@ export class App extends React.PureComponent {
         // Boundaries for the daily routine
         let sunriseStart    = sunrise;
         let sunriseEnd      = sunrise + 60;
-        let morningEnd      = sunPeak - 120;
-        let middayEnd       = sunPeak + 120;
+        let morningEnd      = sunPeak - 90;
+        let middayEnd       = sunPeak + 90;
         let afternoonEnd    = sunsetStart;
         let sunsetEnd       = sunsetStart + 60;
+
 
         // Map it to the right value
         if(currentTime >= sunriseStart && currentTime <= sunriseEnd){
             //Sunrise
-            brightness = this.projectValToInterval(currentTime,sunriseStart, sunriseEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax / 2);
+            brightness = this.projectValToInterval(
+                currentTime,
+                sunriseStart,
+                sunriseEnd,
+                c_data_mapping.visualsValMin,
+                c_data_mapping.visualsValMax / 3);
 
         }else if(currentTime > sunriseEnd && currentTime <= morningEnd){
             //Morning
-            brightness = this.projectValToInterval(currentTime,sunriseEnd, morningEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+            brightness = this.projectValToInterval(
+                currentTime,
+                sunriseEnd,
+                morningEnd,
+                c_data_mapping.visualsValMax / 3,
+                c_data_mapping.visualsValMax);
 
         }else if(currentTime > morningEnd && currentTime <= middayEnd){
             //Midday
@@ -288,11 +300,23 @@ export class App extends React.PureComponent {
 
         }else if(currentTime > middayEnd && currentTime <= afternoonEnd){
             //Afternoon
-            brightness = this.projectValToInterval(currentTime,middayEnd, afternoonEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+            brightness = this.projectValToInterval(
+                currentTime,
+                middayEnd,
+                afternoonEnd,
+                c_data_mapping.visualsValMax,
+                c_data_mapping.visualsValMax / 3
+            );
 
         }else if(currentTime > afternoonEnd && currentTime <= sunsetEnd){
             //Sunset
-            brightness = this.projectValToInterval(currentTime,afternoonEnd, sunsetEnd, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+            brightness = this.projectValToInterval(
+                currentTime,
+                afternoonEnd,
+                sunsetEnd,
+                c_data_mapping.visualsValMax / 3,
+                c_data_mapping.visualsValMin
+            );
 
         }else{
             //Night
@@ -402,11 +426,9 @@ export class App extends React.PureComponent {
             }
 
             <div className="interface" id={this.state.visibleInterface ? null : 'fadeOut'}>
-
                 <TopBar
                     openSettings        = {() => this.toggleSettings()}
                 />
-
                 <Settings
                     config              = {c_settings}
                     visible             = {this.state.visibleSettings}
@@ -432,7 +454,6 @@ export class App extends React.PureComponent {
                     audioData           = {this.state.waveAudioData}
                     audio               = {this.state.audio}
                 />
-
             </div>
 
             {this.state.visualsMount?
@@ -440,15 +461,12 @@ export class App extends React.PureComponent {
                                     className           = "visualsRoot"
                                     visualsParameter    = {this.state.visualsParameter}
                                     speed               = {this.state.speed}
+                                    avg                 = {this.state.avg}
+                                    config              = {c_visuals_data}
+                                    projectValToInterval= {(oldVal, oldMin, oldMax, newMin, newMax) =>
+                                                          this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
                                 />
                                 : ''}
-
-            <NoFiber className = "visualsRoot"
-                     visualsParameter    = {this.state.visualsParameter}
-                     speed               = {this.state.speed}
-            />
-
-
 
             <DevelopInfo
                 eventHandler    = {(event) => this.handleDevEvent(event)}
@@ -465,20 +483,21 @@ export class App extends React.PureComponent {
             {this.state.audio ? <div>
                                 <AudioAnalyser
                                     audio               = {this.state.audio}
-                                    sendAudioData       = {(data, wave, speed) => this.setAudioData(data, wave, speed)}
+                                    sendAudioData       = {(data, wave, speed, avg) => this.setAudioData(data, wave, speed, avg)}
                                     autoSensitivity     = {this.state.autoSensitivity}
                                     micSensitivity      = {this.state.micSensitivity}
                                     adjustSensitivity   = {(value) => this.adjustMicSensitivity(value)}
                                     configData          = {c_audio_data}
                                 />
+                    {/*}
                                 <BarVisualizer
                                     className       = "barVisualiser"
                                     audioData       = {this.state.barAudioData}
                                 />
+                    {*/}
                                 </div>
 
                                 : ''}
-
 
         </div>
 

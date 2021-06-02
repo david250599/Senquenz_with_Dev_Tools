@@ -70,9 +70,13 @@ export class AudioAnalyser extends React.Component{
             this.oldAvg = newAvg;
         }
 
+        //overall AVG
+        let overallAvg = this.barDataArray.reduce(function (a,b){return a + b})/this.barDataArray.length;
+
+
 
         // Send Values to main component
-        this.props.sendAudioData(this.barDataArray, false, this.speed);
+        this.props.sendAudioData(this.barDataArray, false, this.speed, overallAvg);
 
         // Automatic adjustment
         this.maxValuesGain.push(this.barDataArray[2]);

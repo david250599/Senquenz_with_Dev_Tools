@@ -58,9 +58,41 @@
 
   "visuals":
   {
-    "scene1":
-    { "maxObjects": 30
+    "colors":
+    { "hueRange":           360,
+      "dataMin":            0.01,
+      "dataMax":            1,
+      "backMin":            0.1,
+      "backSatMin":         40,
+      "backSatMax":         90,
+      "colorSatMax":        100,
+      "colorLiMin":         30,
+      "colorLiMax":         70
 
+    },
+    "sceneA":
+    { "maxAmount":          20,
+      "minAmount":          3,
+      "maxSize":            20,
+      "minSize":            25,
+      "theMoreTheLes":      -1,
+      "maxVertices":        30
+
+    },
+    "sceneB":
+    { "maxAmount":          450,
+      "minAmount":          100,
+      "maxSize":            20,
+      "minSize":            5,
+      "spacingMax":         20,
+      "spacingMin":         3,
+      "theMoreTheLes":      -1,
+      "makePlane":          0.3,
+      "makeTriangle":       0.7,
+      "gridMinX":           -200,
+      "gidMaxX":            200,
+      "gridMinY":           -150,
+      "offset":             5
     },
     "speed":        0.5
   }
