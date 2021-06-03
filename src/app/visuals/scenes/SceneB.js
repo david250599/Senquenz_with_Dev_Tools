@@ -65,6 +65,7 @@ export class SceneB{
             }
         }
 
+
         this.scene.add(this.groupA, this.groupB);
     }
 
@@ -80,12 +81,12 @@ export class SceneB{
         this.angleA += this.normalSpeedA * avg;
         this.lastAudio -= 0.01;
 
-
         this.groupB.position.z = Math.cos(this.angleB) * 40;
         this.groupB.position.x = Math.cos(this.angleB) * 15;
         this.groupB.position.y = Math.cos(this.angleB) * 15;
 
         this.angleB += this.normalSpeedB * avg;
+
 
 
     }

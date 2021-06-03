@@ -1,13 +1,17 @@
-import React from "react";
-import * as THREE from "three";
+import React                from 'react';
+import * as THREE           from 'three';
+import {EffectComposer}     from 'three/examples/jsm/postprocessing/EffectComposer';
+import {RenderPass}         from 'three/examples/jsm/postprocessing/RenderPass';
+import {AfterimagePass}     from 'three/examples/jsm/postprocessing/AfterimagePass';
 
-import {SceneA} from "./scenes/SceneA"
-import {SceneB} from "./scenes/SceneB"
+import {SceneA} from './scenes/SceneA'
+import {SceneB} from './scenes/SceneB'
 
 
 export class VisualsRoot extends React.Component {
     constructor(props) {
         super(props);
+        this.config = props.config;
         //this.updateScene    = window.setTimeout(() => this.changeScene(), 5000 );
     }
 
@@ -46,18 +50,21 @@ export class VisualsRoot extends React.Component {
 
         // Setup Scenes
         this.allScenes = [
-            new SceneA(this.props.config.sceneA),
-            new SceneB(this.props.config.sceneB),
+            new SceneA(this.config.sceneA),
+            new SceneB(this.config.sceneB),
             0
         ]
 
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(width, height);
         this.el.appendChild(this.renderer.domElement);
+
+        // Motion blur Effect
+        this.composer = new EffectComposer( this.renderer);
     };
 
     setupColors = () =>{
-        const c_colors = this.props.config.colors;
+        const c_colors = this.config.colors;
         const c_hueRange = c_colors.hueRange;
         let brightness = this.props.visualsParameter.brightness;
 
@@ -66,7 +73,7 @@ export class VisualsRoot extends React.Component {
         let lightness;
 
         //Background
-        if(brightness < 0.1){
+        if(brightness < c_colors.backMin){
             saturation = 0;
             lightness = saturation;
             }else{
@@ -124,6 +131,18 @@ export class VisualsRoot extends React.Component {
     loadScene = (index) => {
         let colors = this.setupColors();
         this.allScenes[index].load(this.props.visualsParameter, colors);
+
+        if(this.renderPass){
+            this.composer.removePass(this.renderPass);
+            this.composer.removePass(this.afterimagePass);
+        }
+
+        //postprocessing (water parameter)
+        this.renderPass = new RenderPass(this.allScenes[index].scene, this.camera)
+        this.composer.addPass( this.renderPass);
+        this.afterimagePass = new AfterimagePass(this.props.visualsParameter.water * this.config.effects.maxBlur +
+                                                this.config.effects.minBlur);
+        this.composer.addPass(this.afterimagePass);
     };
 
     changeScene = () => {
@@ -146,7 +165,8 @@ export class VisualsRoot extends React.Component {
     startAnimationLoop = () => {
         this.allScenes[this.currentScene].onRender(this.props.speed, this.props.avg);
 
-        this.renderer.render(this.allScenes[this.currentScene].scene, this.camera);
+        this.composer.render();
+        //this.renderer.render(this.allScenes[this.currentScene].scene, this.camera);
 
         this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
     };

@@ -48,8 +48,8 @@ export class App extends React.PureComponent {
 
             //Location
             currentLocation: {
-                lat:            Math.random() * c_map.maxLat*2 - c_map.maxLat,
-                lng:            Math.random() * c_map.maxLng*2 - c_map.maxLng,
+                lat:            Math.random() * c_map.maxLat * 2 - c_map.maxLat,
+                lng:            Math.random() * c_map.maxLng * 2 - c_map.maxLng,
                 zoom:           c_map.zoomStart
             },
             map:                null,
@@ -214,7 +214,7 @@ export class App extends React.PureComponent {
         }
     }
 
-    // Global location aata
+    // Global location data
     setLocation(lat, lng, zoom){
         this.setState({
             currentLocation: {lat, lng, zoom}
@@ -268,11 +268,11 @@ export class App extends React.PureComponent {
 
         // Boundaries for the daily routine
         let sunriseStart    = sunrise;
-        let sunriseEnd      = sunrise + 60;
-        let morningEnd      = sunPeak - 90;
-        let middayEnd       = sunPeak + 90;
+        let sunriseEnd      = sunrise + c_data_mapping.sunriseMinutes;
+        let morningEnd      = sunPeak - c_data_mapping.middayMinutes;
+        let middayEnd       = sunPeak + c_data_mapping.middayMinutes;
         let afternoonEnd    = sunsetStart;
-        let sunsetEnd       = sunsetStart + 60;
+        let sunsetEnd       = sunsetStart + c_data_mapping.sunsetMinutes;
 
 
         // Map it to the right value

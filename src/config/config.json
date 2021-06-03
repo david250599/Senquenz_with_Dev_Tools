@@ -21,8 +21,8 @@
       "style":              "mapbox://styles/mapbox/light-v10",
       "zoomStart":          2,
       "zoomSearch":         14,
-      "maxLat":             90,
-      "maxLng":             180,
+      "maxLat":             70,
+      "maxLng":             140,
       "queryTerrain":       "https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/",
       "queryStreets":       "https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/",
       "filterLineRoad":     ".json?radius=1000&limit=50&geometry=linestring&layers=road&access_token=",
@@ -35,7 +35,9 @@
   },
 
   "geoDataMapping":
-  {
+  { "sunriseMinutes":       60,
+    "middayMinutes":        90,
+    "sunsetMinutes":        60,
     "queryValMin":          0.01,
     "queryValMax":          0.5,
     "balancingWater":       50,
@@ -70,6 +72,12 @@
       "colorLiMax":         70
 
     },
+
+    "effects":
+    { "minBlur":            0.5,
+      "maxBlur":            0.49
+    },
+
     "sceneA":
     { "maxAmount":          20,
       "minAmount":          3,
