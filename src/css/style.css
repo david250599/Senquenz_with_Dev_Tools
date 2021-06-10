@@ -52,6 +52,7 @@ p{
 
 #fadeOut *{
     height:     0;
+    display: none;
 }
 
 .visualsRoot{

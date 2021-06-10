@@ -59,7 +59,7 @@
   },
 
   "visuals":
-  {
+  { "speed":                0.5,
     "colors":
     { "hueRange":           360,
       "dataMin":            0.01,
@@ -87,8 +87,9 @@
       "maxVertices":        30
 
     },
+
     "sceneB":
-    { "maxAmount":          450,
+    { "maxAmount":          500,
       "minAmount":          100,
       "maxSize":            20,
       "minSize":            5,
@@ -102,7 +103,19 @@
       "gridMinY":           -150,
       "offset":             5
     },
-    "speed":        0.5
+
+    "sceneC":
+    { "maxAmount":          400,
+      "minAmount":          10,
+      "maxSize":            15,
+      "minSize":            4,
+      "spacingMax":         40,
+      "spacingMin":         4,
+      "theMoreTheLes":      -1,
+      "offsetMax":          20,
+      "offsetMin":          0
+
+    }
   }
 
 }

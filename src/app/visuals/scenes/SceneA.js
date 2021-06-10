@@ -17,7 +17,7 @@ export class SceneA{
         this.scene.background = colors.backgroundColor;
 
         //Setup objects of the Scene
-        this.geometry   = new THREE.CircleGeometry(oSize, oVertices);
+        this.geometry   = new THREE.SphereGeometry(oSize, oVertices, oVertices);
 
 
 
@@ -35,9 +35,9 @@ export class SceneA{
         this.scene.add(this.group);
     }
 
-    onRender(speed){
+    onRender(speed, avg){
         this.group.rotation.z += speed * 0.5;
-        let scale = speed *1 + 1;
+        let scale = avg *1 + 1;
         this.group.scale.set(scale, scale, scale);
     }
 

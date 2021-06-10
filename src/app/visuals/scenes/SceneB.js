@@ -2,13 +2,13 @@ import * as THREE from "three";
 
 export class SceneB{
     constructor(config) {
-        this.config = config;
-        this.scene = new THREE.Scene();
-        this.angleA = 0;
-        this.normalSpeedA =  0.3;
-        this.angleB = 0;
-        this.normalSpeedB = 0.1;
-        this.lastAudio = 0;
+        this.config         = config;
+        this.scene          = new THREE.Scene();
+        this.angleA         = 0;
+        this.normalSpeedA   = 0.3;
+        this.angleB         = 0;
+        this.normalSpeedB   = 0.1;
+        this.lastAudio      = 0;
     }
 
     load(visualsParameter, colors){
@@ -22,7 +22,7 @@ export class SceneB{
 
         //Setup objects of the Scene
         if(visualsParameter.hilly <= this.config.makePlane){
-            this.geometry = new THREE.PlaneGeometry(oSize*2, oSize*2);
+            this.geometry   = new THREE.PlaneGeometry(oSize*2, oSize*2);
         }else if(visualsParameter.hilly > this.config.makePlane && visualsParameter.hilly <= this.config.makeTriangle){
             this.geometry   = new THREE.CircleGeometry(oSize, 30);
         }else{
@@ -78,17 +78,14 @@ export class SceneB{
             this.normalSpeedA = -this.normalSpeedA
         }
 
-        this.angleA += this.normalSpeedA * avg;
-        this.lastAudio -= 0.01;
+        this.angleA     += this.normalSpeedA * avg;
+        this.lastAudio  -= 0.01;
 
         this.groupB.position.z = Math.cos(this.angleB) * 40;
         this.groupB.position.x = Math.cos(this.angleB) * 15;
         this.groupB.position.y = Math.cos(this.angleB) * 15;
 
         this.angleB += this.normalSpeedB * avg;
-
-
-
     }
 
     delete(){

@@ -271,3 +271,199 @@ this.testScene.add(this.test);
 
 this.scene.add(this.group);
 
+///////////////////////////////////////////////////////////
+
+import * as THREE from "three";
+
+export class SceneC {
+    constructor(config) {
+        this.config = config;
+        this.scene = new THREE.Scene();
+    }
+
+    load(visualsParameter, colors){
+        this.scene.background = colors.backgroundColor;
+
+        let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
+        let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
+            this.config.maxSize + this.config.minSize;
+        let spacing     = this.config.theMoreTheLes * visualsParameter.urban * this.config.spacingMax +
+            this.config.spacingMax + this.config.spacingMin + oSize*2;
+
+        this.geometry = new THREE.CircleGeometry(oSize, 30);
+        this.material = new THREE.MeshBasicMaterial({color: colors.colorC});
+
+        let posX = this.config.lineStartX;
+        let posY = this.config.lineStartY;
+        let posZ = this.config.lineStartZ;
+        let objectInLine = 0;
+        let oldLineX = this.config.lineStartX;
+        let oldLineY = this.config.lineStartY;
+        let moveLine = spacing;
+
+        this.ObjectArray = [];
+
+        console.log("Amount " + oAmount);
+        for(let i = 0; i < oAmount; i++){
+            if(posZ < this.config.maxPosZ - oSize*2){
+                posX = oldLineX;
+                posY = oldLineY + moveLine;
+                posZ = this.config.lineStartZ;
+                objectInLine = 0;
+
+                oldLineX = posX;
+                oldLineY = posY;
+            }
+
+            let object = new THREE.Mesh(this.geometry, this.material);
+            object.position.x = posX;
+            object.position.z = posZ;
+            object.position.y = posY;
+
+            this.ObjectArray.push(object);
+            this.scene.add(object);
+
+            posX += spacing;
+            posY += Math.pow(objectInLine, 2) * visualsParameter.hilly;
+            posZ -= spacing;
+            objectInLine ++;
+
+
+        }
+
+    }
+
+    onRender(audio, avg){
+
+    }
+
+    delete(){
+        while (this.scene.children.length > 0){
+            this.scene.remove(this.scene.children[0]);
+        }
+        this.geometry.dispose();
+        this.material.dispose();
+    }
+}
+
+/////////////////////////////////////////////////////////////////////
+import * as THREE from "three";
+import {color} from "three/examples/jsm/libs/dat.gui.module";
+
+export class SceneC {
+    constructor(config) {
+        this.config = config;
+        this.scene = new THREE.Scene();
+    }
+
+    load(visualsParameter, colors){
+        this.scene.background = colors.backgroundColor;
+
+        this.oAmount    = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
+        let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
+            this.config.maxSize + this.config.minSize;
+
+
+        this.materialB = new THREE.MeshBasicMaterial({color: colors.colorB, opacity: 0.7, transparent: true});
+        this.materialC = new THREE.MeshBasicMaterial({color: colors.colorC, opacity: 0.7, transparent: true});
+
+        this.groupA = new THREE.Group();
+        this.groupB = new THREE.Group();
+        this.groupC = new THREE.Group();
+
+        this.createCircles(oSize, visualsParameter.urban, colors.colorA, this.groupA);
+        oSize += visualsParameter.hilly*2;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorB, this.groupB);
+
+
+
+        // Duplicating groupA
+        this.groupB.add(this.groupA.clone());
+        this.groupC.add(this.groupA.clone());
+
+        // Change position & colors for new groups
+        this.groupB.rotateZ(60 * Math.PI / 180);
+        this.groupC.rotateZ(120 * Math.PI / 180);
+
+        /*
+                this.groupB.traverse( (object) =>{
+                    if ( object instanceof THREE.Mesh){
+                        object.material = this.materialB;
+                        object.position.z = -1;
+                    }
+                });
+
+         */
+
+        this.groupC.traverse((object) => {
+            if ( object instanceof THREE.Mesh){
+                object.material = this.materialC;
+                object.position.z = -2;
+            }
+        });
+
+
+
+
+        this.scene.add(this.groupA, this.groupB, this.groupC);
+    }
+
+    createCircles(oSize, urban, color, group){
+        this.geometry  = new THREE.CircleGeometry(oSize, 30);
+        this.material  = new THREE.MeshBasicMaterial({color: color, opacity: 0.7, transparent: true});
+
+        let spacing    = this.config.theMoreTheLes * urban * this.config.spacingMax +
+            this.config.spacingMax + this.config.spacingMin + oSize*2;
+        let angle = 0;
+        let circleSize = oSize + spacing/4;
+
+        let angleStep = Math.floor(oSize*4);
+        while (360 % angleStep !== 0){
+            angleStep++;
+        }
+
+        for(let i = 0; i < this.oAmount; i++){
+            let object = new THREE.Mesh(this.geometry, this.material);
+            object.position.x = Math.cos(angle * Math.PI / 180) * circleSize;
+            object.position.y = Math.sin(angle * Math.PI / 180) * circleSize;
+            angle += angleStep;
+            group.add(object);
+
+            if(angle >= 360){
+                angle = 0;
+                circleSize += spacing;
+            }
+        }
+
+    }
+
+    onRender(audio, avg){
+        this.groupA.rotateZ(audio * 0.01);
+
+        this.groupB.rotateZ(- audio * 0.01);
+
+        /*
+        let x = Math.sign(this.deltaScale);
+        this.deltaScale = x * 0.0001 + avg/4 * x;
+        if(this.scaleC < 0.5 || this.scaleC > 15){
+            this.deltaScale = -this.deltaScale;
+        }
+        this.scaleC += this.deltaScale;
+        this.groupC.scale.set(this.scaleC, this.scaleC, this.scaleC);
+
+         */
+    }
+
+    delete(){
+        while (this.scene.children.length > 0){
+            this.scene.remove(this.scene.children[0]);
+        }
+        this.geometry.dispose();
+        this.material.dispose();
+        this.materialB.dispose();
+        this.materialC.dispose();
+
+    }
+}
+
+//////////////////////////////////////////////////////////////

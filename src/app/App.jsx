@@ -71,7 +71,7 @@ export class App extends React.PureComponent {
 
             visualsMount:       false,
             speed:              c_visuals_data.speed,
-            avg:                0
+            avg:                0.5
 
         };
     }
@@ -454,6 +454,19 @@ export class App extends React.PureComponent {
                     audioData           = {this.state.waveAudioData}
                     audio               = {this.state.audio}
                 />
+
+                <DevelopInfo
+                    eventHandler    = {(event) => this.handleDevEvent(event)}
+                    intensity       = {this.state.visualsParameter.intensity}
+                    brightness      = {this.state.visualsParameter.brightness}
+                    hilly           = {this.state.visualsParameter.hilly}
+                    water           = {this.state.visualsParameter.water}
+                    urban           = {this.state.visualsParameter.urban}
+                    structureSize   = {this.state.visualsParameter.structureSize}
+                    visualsMount    = {this.state.visualsParameter.visualsMount}
+                    speed           = {this.state.speed}
+                />
+
             </div>
 
             {this.state.visualsMount?
@@ -468,17 +481,7 @@ export class App extends React.PureComponent {
                                 />
                                 : ''}
 
-            <DevelopInfo
-                eventHandler    = {(event) => this.handleDevEvent(event)}
-                intensity       = {this.state.visualsParameter.intensity}
-                brightness      = {this.state.visualsParameter.brightness}
-                hilly           = {this.state.visualsParameter.hilly}
-                water           = {this.state.visualsParameter.water}
-                urban           = {this.state.visualsParameter.urban}
-                structureSize   = {this.state.visualsParameter.structureSize}
-                visualsMount    = {this.state.visualsParameter.visualsMount}
-                speed           = {this.state.speed}
-            />
+
 
             {this.state.audio ? <div>
                                 <AudioAnalyser

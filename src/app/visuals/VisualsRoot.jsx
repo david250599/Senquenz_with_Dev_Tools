@@ -4,8 +4,11 @@ import {EffectComposer}     from 'three/examples/jsm/postprocessing/EffectCompos
 import {RenderPass}         from 'three/examples/jsm/postprocessing/RenderPass';
 import {AfterimagePass}     from 'three/examples/jsm/postprocessing/AfterimagePass';
 
-import {SceneA} from './scenes/SceneA'
-import {SceneB} from './scenes/SceneB'
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+
+import {SceneA}             from './scenes/SceneA';
+import {SceneB}             from './scenes/SceneB';
+import {SceneC}             from './scenes/SceneC';
 
 
 export class VisualsRoot extends React.Component {
@@ -19,7 +22,7 @@ export class VisualsRoot extends React.Component {
         console.log('Mount');
         this.rootSetup();
 
-        this.currentScene = 1;
+        this.currentScene = 2;
         this.loadScene(this.currentScene);
 
         this.startAnimationLoop();
@@ -28,9 +31,13 @@ export class VisualsRoot extends React.Component {
 
     componentWillUnmount() {
         this.allScenes[this.currentScene].delete();
+        this.composer.removePass(this.renderPass);
+        this.composer.removePass(this.afterimagePass);
         window.removeEventListener("resize", this.handleWindowResize);
         window.cancelAnimationFrame(this.requestID);
         window.clearTimeout(this.updateScene);
+
+        this.controls.dispose();
     }
 
 
@@ -48,11 +55,13 @@ export class VisualsRoot extends React.Component {
         this.camera.position.z = 100;
         this.camera.lookAt(0, 0, 0);
 
+        this.controls = new OrbitControls( this.camera, this.el );
+
         // Setup Scenes
         this.allScenes = [
             new SceneA(this.config.sceneA),
             new SceneB(this.config.sceneB),
-            0
+            new SceneC(this.config.sceneC)
         ]
 
         this.renderer = new THREE.WebGLRenderer();
@@ -64,11 +73,11 @@ export class VisualsRoot extends React.Component {
     };
 
     setupColors = () =>{
-        const c_colors = this.config.colors;
-        const c_hueRange = c_colors.hueRange;
-        let brightness = this.props.visualsParameter.brightness;
+        const c_colors      = this.config.colors;
+        const c_hueRange    = c_colors.hueRange;
+        let brightness      = this.props.visualsParameter.brightness;
 
-        let hueMain = Math.round(Math.random()*c_hueRange);
+        let hueMain         = Math.round(Math.random()*c_hueRange);
         let saturation;
         let lightness;
 
@@ -100,23 +109,21 @@ export class VisualsRoot extends React.Component {
         ));
 
         // Color A
-        let hueA = hueMain + c_hueRange/2;
-        hueA = this.checkColorAngle(hueA, c_hueRange);
-        let colorA = new THREE.Color("hsl("+hueA+","+ saturation + "%," + lightness + "%)");
+        let hueA    = hueMain + c_hueRange/2;
+        hueA        = this.checkColorAngle(hueA, c_hueRange);
+        let colorA  = new THREE.Color("hsl("+hueA+","+ saturation + "%," + lightness + "%)");
 
         // Color B
-        let hueB = hueMain + c_hueRange/4;
-        hueB = this.checkColorAngle(hueB, c_hueRange);
-        let colorB = new THREE.Color("hsl("+hueB+","+ saturation + "%," + lightness + "%)");
+        let hueB    = hueMain + c_hueRange/4;
+        hueB        = this.checkColorAngle(hueB, c_hueRange);
+        let colorB  = new THREE.Color("hsl("+hueB+","+ saturation + "%," + lightness + "%)");
 
         // Color C
-        let hueC = hueMain - c_hueRange/4;
-        hueC = this.checkColorAngle(hueC, c_hueRange);
-        let colorC = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightness + "%)");
-
+        let hueC    = hueMain - c_hueRange/4;
+        hueC        = this.checkColorAngle(hueC, c_hueRange);
+        let colorC  = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightness + "%)");
 
         return {backgroundColor, colorA, colorB, colorC}
-
     }
 
     checkColorAngle(val, maxRange){
@@ -166,7 +173,6 @@ export class VisualsRoot extends React.Component {
         this.allScenes[this.currentScene].onRender(this.props.speed, this.props.avg);
 
         this.composer.render();
-        //this.renderer.render(this.allScenes[this.currentScene].scene, this.camera);
 
         this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
     };
