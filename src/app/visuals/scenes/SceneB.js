@@ -4,11 +4,15 @@ export class SceneB{
     constructor(config) {
         this.config         = config;
         this.scene          = new THREE.Scene();
-        this.angleA         = 0;
-        this.normalSpeedA   = 0.3;
-        this.angleB         = 0;
-        this.normalSpeedB   = 0.1;
+        this.colorMode      = 'sw';
+
+        this.angle          = 0;
+        this.normalSpeed    = 0.2;
         this.lastAudio      = 0;
+        this.timeOut        = 0;
+        this.rotate         = false;
+        this.targetDegree   = 45;
+        this.currentDegree  = 0;
     }
 
     load(visualsParameter, colors){
@@ -29,63 +33,154 @@ export class SceneB{
             this.geometry   = new THREE.CircleGeometry(oSize, 3);
         }
 
-        this.materialA   = new THREE.MeshBasicMaterial({color: colors.colorA});
-        this.materialB   = new THREE.MeshBasicMaterial({color: colors.colorB});
+        this.materialA   = new THREE.MeshBasicMaterial({color: colors.colorB});
+        this.materialB   = new THREE.MeshBasicMaterial({color: colors.colorA});
+        this.materialA.side = THREE.DoubleSide;
+        this.materialB.side = THREE.DoubleSide;
+
+
+        if( visualsParameter.brightness < 0.5){
+            this.materialA.blending      = THREE.AdditiveBlending;
+            this.materialB.blending      = THREE.AdditiveBlending;
+        }
+
+
+        /* Color mode
+        // adjust blending if background is to bright
+        if ( visualsParameter.brightness <= 0.8){
+            this.materialA.blending      = THREE.AdditiveBlending;
+            this.materialB.blending      = THREE.AdditiveBlending;
+        }else if(visualsParameter.brightness > 0.8){
+            this.materialA.opacity       = 0.7;
+            this.materialA.transparent   = true;
+            this.materialB.opacity       = 0.7;
+            this.materialB.transparent   = true;
+        }
+*/
+
+
+
 
         this.groupA = new THREE.Group();
-        let posX = this.config.gridMinX;
-        let posY = this.config.gridMinY;
-
-        for(let i = 0; i < oAmount; i++){
-            let object = new THREE.Mesh(this.geometry, this.materialA);
-            object.position.x = posX;
-            object.position.y = posY;
-            this.groupA.add(object);
-
-            posX += spacing;
-            if(posX > this.config.gidMaxX){
-                posX = this.config.gridMinX;
-                posY += spacing;
-            }
-        }
-
         this.groupB = new THREE.Group();
-        posX = this.config.gridMinX + this.config.offset;
-        posY = this.config.gridMinY + this.config.offset;
-        for(let i = 0; i < oAmount; i++){
-            let object = new THREE.Mesh(this.geometry, this.materialB);
-            object.position.x = posX;
-            object.position.y = posY;
-            this.groupB.add(object);
 
-            posX += spacing;
-            if(posX > this.config.gidMaxX+ this.config.offset){
-                posX = this.config.gridMinX + this.config.offset;
-                posY += spacing;
-            }
-        }
+        this.createGrid(this.geometry,
+                        this.materialA,
+                        colors.colorC,
+                        false,
+                        this.config.gridMinX,
+                        this.config.gridMinY,
+                    -1,
+                        oAmount,
+                        spacing,
+                        this.config.gidMaxX,
+                        this.config.gridMinX,
+                        this.groupA);
+
+        this.createGrid(this.geometry,
+                        this.materialB,
+                        colors.colorC,
+                    false,
+                    this.config.gridMinX + this.config.offset,
+                    this.config.gridMinY + this.config.offset,
+                    0,
+                        oAmount,
+                        spacing,
+                    this.config.gidMaxX + this.config.offset,
+                    this.config.gridMinX + this.config.offset,
+                        this.groupB);
 
 
         this.scene.add(this.groupA, this.groupB);
     }
 
-    onRender(audio, avg){
-        this.groupA.position.x = Math.cos(this.angleA) * 15;
-        this.groupA.position.y = Math.sin(this.angleA) * 15;
+    createGrid(geometry, material, colorOutline, createOutline, posX, posY, posZ, oAmount, spacing, maxX, minX, group){
+        let outlineMaterial = new THREE.MeshBasicMaterial( { color: colorOutline} );
 
-        if(audio > 0.6 && audio > this.lastAudio) {
-            this.lastAudio = audio;
-            this.normalSpeedA = -this.normalSpeedA
+
+        for(let i = 0; i < oAmount; i++){
+            let object = new THREE.Mesh(geometry, material);
+            object.renderOrder = 1;
+            object.position.x = posX;
+            object.position.y = posY;
+            object.position.z = posZ;
+
+            group.add(object);
+
+            if(createOutline){
+                let outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
+                outlineMesh.position.x = object.position.x;
+                outlineMesh.position.y = object.position.y;
+                outlineMesh.position.z = object.position.z;
+
+                outlineMesh.scale.multiplyScalar(1.1);
+                group.add(outlineMesh);
+            }
+
+
+
+
+
+            posX += spacing;
+            if(posX > maxX){
+                posX = minX;
+                posY += spacing;
+            }
         }
+    }
 
-        this.angleA     += this.normalSpeedA * avg;
+    onRender(audio, avg){
+        this.groupA.position.x = Math.cos(this.angle) * 15;
+        this.groupA.position.y = Math.sin(this.angle) * 15;
+        this.groupB.position.x = Math.cos(-this.angle) * 15;
+        this.groupB.position.y = Math.sin(-this.angle) * 15;
+
+        //Reverse after beat
+        if(audio > 0.8 && audio > this.lastAudio) {
+            this.lastAudio = audio;
+            this.normalSpeed = -this.normalSpeed
+        }
+        this.angle      += this.normalSpeed * avg;
         this.lastAudio  -= 0.01;
 
+
+        // Rotate Objects
+        if(avg > 0.25 && this.timeOut < 0){
+            this.rotate   = true;
+            this.timeOut  = 500;
+
+        }
+        if(this.rotate && this.currentDegree <= this.targetDegree){
+            let array = this.groupA.children;
+            array.forEach(element => {
+                if(element instanceof THREE.Mesh){
+                    element.rotateZ(avg * Math.PI / 180);
+                }
+            });
+            array = this.groupB.children;
+            array.forEach(element => {
+                if(element instanceof THREE.Mesh){
+                    element.rotateZ(-avg * Math.PI / 180);
+                }
+            })
+
+            this.currentDegree += avg;
+
+
+        }else if(this.currentDegree >= this.targetDegree){
+            this.rotate = false;
+            this.currentDegree = 0;
+        }
+
+        this.timeOut --;
+
+        /*
         this.groupB.position.z = Math.cos(this.angleB) * 40;
         this.groupB.position.x = Math.cos(this.angleB) * 15;
         this.groupB.position.y = Math.cos(this.angleB) * 15;
-
         this.angleB += this.normalSpeedB * avg;
+*/
+
     }
 
     delete(){

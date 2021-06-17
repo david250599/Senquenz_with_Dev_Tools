@@ -259,7 +259,7 @@ export class App extends React.PureComponent {
         // Get position of sun for brightness parameter
         let brightness;
         let currentDate     = new Date();
-        let currentTime  = currentDate.getHours()*60 + currentDate.getMinutes();
+        let currentTime     = currentDate.getHours()*60 + currentDate.getMinutes();
 
         let times           = SunCalc.getTimes(currentDate, this.state.currentLocation.lat, this.state.currentLocation.lng);
         let sunrise         = times.sunrise.getHours() * 60 + times.sunrise.getMinutes();

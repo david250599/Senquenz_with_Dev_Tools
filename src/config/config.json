@@ -36,7 +36,7 @@
 
   "geoDataMapping":
   { "sunriseMinutes":       60,
-    "middayMinutes":        90,
+    "middayMinutes":        60,
     "sunsetMinutes":        60,
     "queryValMin":          0.01,
     "queryValMax":          0.5,
@@ -64,9 +64,7 @@
     { "hueRange":           360,
       "dataMin":            0.01,
       "dataMax":            1,
-      "backMin":            0.1,
-      "backSatMin":         40,
-      "backSatMax":         90,
+      "setBlackAt":         0.1,
       "colorSatMax":        100,
       "colorLiMin":         30,
       "colorLiMax":         70
@@ -89,7 +87,7 @@
     },
 
     "sceneB":
-    { "maxAmount":          500,
+    { "maxAmount":          800,
       "minAmount":          100,
       "maxSize":            20,
       "minSize":            5,
@@ -98,15 +96,15 @@
       "theMoreTheLes":      -1,
       "makePlane":          0.3,
       "makeTriangle":       0.7,
-      "gridMinX":           -200,
-      "gidMaxX":            200,
+      "gridMinX":           -300,
+      "gidMaxX":            300,
       "gridMinY":           -150,
       "offset":             5
     },
 
     "sceneC":
     { "maxAmount":          400,
-      "minAmount":          10,
+      "minAmount":          20,
       "maxSize":            15,
       "minSize":            4,
       "spacingMax":         40,

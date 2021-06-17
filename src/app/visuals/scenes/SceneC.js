@@ -1,21 +1,17 @@
 import * as THREE from "three";
-import {color} from "three/examples/jsm/libs/dat.gui.module";
 
 export class SceneC {
     constructor(config) {
-        this.config = config;
-        this.scene = new THREE.Scene();
+        this.config       = config;
+        this.scene        = new THREE.Scene();
+        this.colorMode    = 'color';
 
-        this.lastAudio = 0;
-        this.targetC = 1;
-        this.scaleC = 1;
-        this.scaleSpeed = 0.01;
-        this.angle = 0;
+        this.angle        = 0;
         this.normalspeedZ = 0.2;
-
     }
 
     load(visualsParameter, colors){
+        this.visualsParameter = visualsParameter;
         this.scene.background = colors.backgroundColor;
 
         this.oAmount    = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
@@ -26,11 +22,12 @@ export class SceneC {
         this.groupB = new THREE.Group();
         this.groupC = new THREE.Group();
 
-        this.createCircles(oSize, visualsParameter.urban, colors.colorA, 0, this.groupA);
-        oSize += visualsParameter.hilly*15;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorB, -10, this.groupB);
-        oSize += visualsParameter.hilly*15;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorC, -20, this.groupC);
+        oSize += visualsParameter.hilly*30;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorC, -50, this.groupC);
+        oSize -= visualsParameter.hilly*15;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorB, 0, this.groupB);
+        oSize -= visualsParameter.hilly*15;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorA, 10, this.groupA);
 
         this.groupB.rotateZ(60 * Math.PI / 180);
         this.groupC.rotateZ(120 * Math.PI / 180);
@@ -40,14 +37,22 @@ export class SceneC {
 
     createCircles(oSize, urban, color, z, group){
         this.geometry  = new THREE.CircleGeometry(oSize, 30);
-        this.material  = new THREE.MeshBasicMaterial({color: color, opacity: 0.7, transparent: true});
+        this.material  = new THREE.MeshBasicMaterial({color: color});
 
-        let spacing    = this.config.theMoreTheLes * urban * this.config.spacingMax +
-                         this.config.spacingMax + this.config.spacingMin + oSize*2;
-        let angle = 0;
-        let circleSize = oSize + spacing/4;
+        // adjust blending if background is to bright
+        if ( this.visualsParameter.brightness <= 0.8){
+            this.material.blending      = THREE.AdditiveBlending;
+        }else if(this.visualsParameter.brightness > 0.8){
+            this.material.opacity       = 0.7;
+            this.material.transparent   = true;
+        }
 
-        let angleStep = Math.floor(oSize*3);
+        let spacing     = this.config.theMoreTheLes * urban * this.config.spacingMax +
+                          this.config.spacingMax + this.config.spacingMin + oSize*2;
+        let angle       = 0;
+        let circleSize  = oSize + spacing/4;
+
+        let angleStep   = Math.floor(oSize*3);
         while (360 % angleStep !== 0){
             angleStep++;
         }
@@ -74,25 +79,10 @@ export class SceneC {
         this.groupC.rotateZ(avg * 0.02);
 
         this.groupA.position.z = Math.cos(this.angle) * 10;
-        this.groupB.position.z = Math.cos(this.angle + 1) *15;
-        this.groupC.position.z = Math.cos(this.angle + 2) * 10;
+        this.groupB.position.z = Math.cos(this.angle +1 ) * 10;
+        this.groupC.position.z = Math.cos(this.angle + 2) * 30;
 
         this.angle += this.normalspeedZ * avg;
-
-
-
-
-
-        /*
-        let x = Math.sign(this.deltaScale);
-        this.deltaScale = x * 0.0001 + avg/4 * x;
-        if(this.scaleC < 0.5 || this.scaleC > 15){
-            this.deltaScale = -this.deltaScale;
-        }
-        this.scaleC += this.deltaScale;
-        this.groupC.scale.set(this.scaleC, this.scaleC, this.scaleC);
-
-         */
     }
 
     delete(){
@@ -101,6 +91,5 @@ export class SceneC {
         }
         this.geometry.dispose();
         this.material.dispose();
-
     }
 }
