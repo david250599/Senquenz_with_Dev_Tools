@@ -219,8 +219,8 @@ export class VisualsRoot extends React.Component {
     }
 
     loadScene = (index) => {
-        let colors = this.setupColors(this.allScenes[index].colorMode);
-        this.allScenes[index].load(this.props.visualsParameter, colors);
+        let colorMode = this.setupColors(this.allScenes[index].colorMode);
+        this.allScenes[index].load(this.props.visualsParameter, colorMode);
 
         if(this.renderPass){
             this.composer.removePass(this.renderPass);
