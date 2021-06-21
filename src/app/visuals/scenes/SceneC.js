@@ -1,95 +1,151 @@
-import * as THREE from "three";
+import * as THREE           from 'three';
+
 
 export class SceneC {
     constructor(config) {
-        this.config       = config;
-        this.scene        = new THREE.Scene();
-        this.colorMode    = 'color';
+        this.config = config;
+        this.scene = new THREE.Scene();
+        this.colorMode = 'color';
 
-        this.angle        = 0;
-        this.normalspeedZ = 0.2;
+
     }
 
     load(visualsParameter, colors){
-        this.visualsParameter = visualsParameter;
+
         this.scene.background = colors.backgroundColor;
 
-        this.oAmount    = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
-        let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
-                          this.config.maxSize + this.config.minSize;
+        let oAmount = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
+        let oSize   = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
+                      this.config.maxSize + this.config.minSize;
+        let probability = this.config.theMoreTheLes * visualsParameter.urban * 0.6 + 0.6 - 0.1;
 
         this.groupA = new THREE.Group();
         this.groupB = new THREE.Group();
-        this.groupC = new THREE.Group();
 
-        oSize += visualsParameter.hilly*30;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorC, -50, this.groupC);
-        oSize -= visualsParameter.hilly*15;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorB, 0, this.groupB);
-        oSize -= visualsParameter.hilly*15;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorA, 10, this.groupA);
+        this.materialA = new THREE.LineBasicMaterial({color: colors.colorA, linewidth: 15});
+        this.materialB = new THREE.LineBasicMaterial({color: colors.colorB, linewidth: 15});
 
-        this.groupB.rotateZ(60 * Math.PI / 180);
-        this.groupC.rotateZ(120 * Math.PI / 180);
+        let downPoints = [];
+        let upPoints = [];
 
-        this.scene.add(this.groupA, this.groupB, this.groupC);
-    }
 
-    createCircles(oSize, urban, color, z, group){
-        this.geometry  = new THREE.CircleGeometry(oSize, 30);
-        this.material  = new THREE.MeshBasicMaterial({color: color});
+        // Setup object geometry
+        if(visualsParameter.hilly <= this.config.makePlane){
+            // Straight
+            downPoints.push( new THREE.Vector3( -1,  1, 0));
+            downPoints.push( new THREE.Vector3( 0,  0, 0));
+            downPoints.push( new THREE.Vector3( 1, -1 , 0));
+            this.geometrydown = new THREE.BufferGeometry().setFromPoints(downPoints);
 
-        // adjust blending if background is to bright
-        if ( this.visualsParameter.brightness <= 0.8){
-            this.material.blending      = THREE.AdditiveBlending;
-        }else if(this.visualsParameter.brightness > 0.8){
-            this.material.opacity       = 0.7;
-            this.material.transparent   = true;
+            upPoints.push( new THREE.Vector3( -1, -1, 0));
+            upPoints.push( new THREE.Vector3( 1,  1, 0 ));
+            this.geometryup = new THREE.BufferGeometry().setFromPoints(upPoints);
+
+        }else if(visualsParameter.hilly > this.config.makePlane && visualsParameter.hilly <= this.config.makeTriangle){
+            //Curved
+            let curveDown = new THREE.CatmullRomCurve3( [
+                new THREE.Vector3(-1, 1, 0),
+                new THREE.Vector3(0.5, 0.5, 0),
+                new THREE.Vector3( 1, -1, 0)
+            ]);
+            let points = curveDown.getPoints(10);
+            this.geometrydown = new THREE.BufferGeometry().setFromPoints(points);
+
+            let curveUp = new THREE.CatmullRomCurve3( [
+                new THREE.Vector3(-1, -1, 0),
+                new THREE.Vector3(-0.5, 0.5, 0),
+                new THREE.Vector3( 1, 1, 0)
+            ]);
+            points = curveUp.getPoints(10);
+            this.geometryup = new THREE.BufferGeometry().setFromPoints(points);
+
+        }else{
+            //Zic Zac
+            downPoints.push( new THREE.Vector3( -1,  1, 0));
+            downPoints.push( new THREE.Vector3( Math.random(),  0.6, 0));
+            downPoints.push( new THREE.Vector3( Math.random(),  -0.6, 0));
+            downPoints.push( new THREE.Vector3( 1, -1 , 0));
+            this.geometrydown = new THREE.BufferGeometry().setFromPoints(downPoints);
+
+            upPoints.push( new THREE.Vector3( -1, -1, 0));
+            upPoints.push( new THREE.Vector3( Math.random(), -0.6, 0));
+            upPoints.push( new THREE.Vector3( Math.random(), 0.6, 0));
+            upPoints.push( new THREE.Vector3( 1,  1, 0 ));
+            this.geometryup = new THREE.BufferGeometry().setFromPoints(upPoints);
+
         }
 
-        let spacing     = this.config.theMoreTheLes * urban * this.config.spacingMax +
-                          this.config.spacingMax + this.config.spacingMin + oSize*2;
-        let angle       = 0;
-        let circleSize  = oSize + spacing/4;
 
-        let angleStep   = Math.floor(oSize*3);
-        while (360 % angleStep !== 0){
-            angleStep++;
-        }
 
-        for(let i = 0; i < this.oAmount; i++){
-            let object = new THREE.Mesh(this.geometry, this.material);
-            object.position.x = Math.cos(angle * Math.PI / 180) * circleSize;
-            object.position.y = Math.sin(angle * Math.PI / 180) * circleSize;
-            object.position.z = z;
-            angle += angleStep;
-            group.add(object);
+        let posX = -200;
+        let posY = -100;
+        let posZ = 0;
 
-            if(angle >= 360){
-                angle = 0;
-                circleSize += spacing;
+        let maxX = 200;
+        let minX = -200;
+
+        for(let i = 0; i < oAmount; i++){
+           let line;
+
+           //Switch between patterns
+            if(Math.random() < probability){
+                line = new THREE.Line(this.geometryup, this.materialA);
+                this.groupA.add(line);
+            }else{
+                line = new THREE.Line(this.geometrydown, this.materialB);
+                this.groupB.add(line);
             }
+
+            line.scale.multiplyScalar(oSize);
+
+            line.position.set(posX, posY, posZ);
+
+            posX += oSize *2;
+
+            if(posX >= maxX){
+                posY += oSize * 2;
+                posX = minX;
+            }
+
         }
+
+        this.scene.add(this.groupA, this.groupB);
+
+
     }
 
     onRender(audio, avg){
-        this.groupA.rotateZ(audio * 0.03);
-        this.groupB.rotateZ(- audio * 0.03);
 
-        this.groupC.rotateZ(avg * 0.02);
 
-        this.groupA.position.z = Math.cos(this.angle) * 10;
-        this.groupB.position.z = Math.cos(this.angle +1 ) * 10;
-        this.groupC.position.z = Math.cos(this.angle + 2) * 30;
 
-        this.angle += this.normalspeedZ * avg;
+
+
+        /*
+        let array = this.groupA.children;
+        array.forEach(element =>{
+            if(element instanceof THREE.Line){
+                element.rotateZ(0.01);
+            }
+        })
+
+        array = this.groupB.children;
+        array.forEach(element =>{
+            if(element instanceof THREE.Line){
+                element.rotateZ(-0.01);
+            }
+        })
+*/
+
     }
 
     delete(){
         while (this.scene.children.length > 0){
             this.scene.remove(this.scene.children[0]);
         }
-        this.geometry.dispose();
-        this.material.dispose();
+        this.geometryup.dispose();
+        this.geometrydown.dispose();
+        this.materialA.dispose();
+        this.materialB.dispose();
     }
+
 }

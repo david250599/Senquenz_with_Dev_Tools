@@ -9,6 +9,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {SceneA}             from './scenes/SceneA';
 import {SceneB}             from './scenes/SceneB';
 import {SceneC}             from './scenes/SceneC';
+import {SceneD}             from './scenes/SceneD';
 
 
 export class VisualsRoot extends React.Component {
@@ -36,7 +37,7 @@ export class VisualsRoot extends React.Component {
         window.cancelAnimationFrame(this.requestID);
         window.clearTimeout(this.updateScene);
 
-        //this.controls.dispose();
+        this.controls.dispose();
     }
 
 
@@ -54,13 +55,14 @@ export class VisualsRoot extends React.Component {
         this.camera.position.z = 100;
         this.camera.lookAt(0, 0, 0);
 
-        //this.controls = new OrbitControls( this.camera, this.el );
+        this.controls = new OrbitControls( this.camera, this.el );
 
         // Setup Scenes
         this.allScenes = [
             new SceneA(this.config.sceneA),
             new SceneB(this.config.sceneB),
-            new SceneC(this.config.sceneC)
+            new SceneC(this.config.sceneC),
+            new SceneD(this.config.sceneD)
         ]
 
         this.renderer = new THREE.WebGLRenderer();
@@ -80,50 +82,49 @@ export class VisualsRoot extends React.Component {
 
         if(mode === "sw"){
             // Greyscale setup
-            let lightnessA, lightnessB, lightnessC;
+            let mainHue = Math.round(this.props.projectValToInterval(
+                brightness,
+                c_colors.dataMin,
+                c_colors.dataMax,
+                0,
+                180
+            ));
+
+            //Background black or white
             saturation = 0;
-            if(brightness >= 0.5){
+            if(this.props.visualsParameter.brightness > 0.3){
                 lightness = 100;
-                lightnessA = Math.round(this.props.projectValToInterval(
-                    brightness,
-                    0.5,
-                    c_colors.dataMax,
-                    70,
-                    0
-                ));
             }else{
                 lightness = 0;
-                lightnessA = Math.round(this.props.projectValToInterval(
-                    brightness,
-                    c_colors.dataMin,
-                    0.5,
-                    40,
-                    100
-                ));
             }
+            backgroundColor = new THREE.Color("hsl("+ mainHue +","+ saturation + "%," + lightness + "%)");
 
-            // Background
-            backgroundColor = new THREE.Color("hsl(0,"+ saturation + "%," + lightness + "%)");
+            // Colors in selected Area
+            saturation  = c_colors.colorSatMax;
+            lightness   = Math.round(this.props.projectValToInterval(
+                brightness,
+                c_colors.dataMin,
+                c_colors.dataMax,
+                20,
+                75
+            ));
 
             // Color A
-            colorA = new THREE.Color("hsl(0,"+ saturation + "%," + lightnessA + "%)");
+            // Map color from selected area to real color wheel
+            let hueA    = this.checkColorAngle(240 + mainHue, c_hueRange);
+            colorA      = new THREE.Color("hsl("+ hueA +","+ saturation + "%," + lightness + "%)");
 
             // Color B
-            lightnessB =  lightnessA - 30;
-            if(lightnessB < 0){
-                lightnessB = 0;
-            }
-            colorB = new THREE.Color("hsl(0,"+ saturation + "%," + lightnessB + "%)");
-
+            let hueB    = mainHue + Math.round(Math.random()*80);
+            hueB        = this.checkColorAngle(hueB, 180);
+            hueB        = this.checkColorAngle(240 + hueB, c_hueRange);
+            colorB      = new THREE.Color("hsl("+hueB+","+ saturation + "%," + lightness + "%)");
 
             // Color C
-            saturation = 100;
-            lightnessC = lightnessB;
-
-            let hueC = Math.round(Math.random()*180);
-            hueC = this.checkColorAngle(240 + hueC, c_hueRange);
-            colorC   = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightnessC + "%)");
-
+            let hueC    = mainHue - Math.round(Math.random()*80);
+            hueC        = this.checkColorAngle(hueC, 180);
+            hueC        = this.checkColorAngle(240 + hueC, c_hueRange);
+            colorC      = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightness + "%)");
 
 
         }else if(mode === "color"){
@@ -246,7 +247,7 @@ export class VisualsRoot extends React.Component {
 
         this.loadScene(indexNew);
         this.allScenes[this.currentScene].delete();
-        this.currentScene = indexNew;
+        this.currentScene   = indexNew;
 
         this.updateScene    = window.setTimeout(() => this.changeScene(), 40000 );
     }
@@ -260,7 +261,7 @@ export class VisualsRoot extends React.Component {
     };
 
     handleWindowResize = () => {
-        const width = this.el.clientWidth;
+        const width  = this.el.clientWidth;
         const height = this.el.clientHeight;
 
         this.renderer.setSize(width, height);

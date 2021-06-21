@@ -1,195 +1,109 @@
 import * as THREE from "three";
 
-export class SceneB{
+export class SceneB {
     constructor(config) {
-        this.config         = config;
-        this.scene          = new THREE.Scene();
-        this.colorMode      = 'sw';
+        this.config       = config;
+        this.scene        = new THREE.Scene();
+        this.colorMode    = 'color';
 
-        this.angle          = 0;
-        this.normalSpeed    = 0.2;
-        this.lastAudio      = 0;
-        this.timeOut        = 0;
-        this.rotate         = false;
-        this.targetDegree   = 45;
-        this.currentDegree  = 0;
+        this.angle        = 0;
+        this.normalspeedZ = 0.2;
     }
 
     load(visualsParameter, colors){
-        let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
-        let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
-                          this.config.maxSize + this.config.minSize;
-        let spacing     = this.config.theMoreTheLes * visualsParameter.urban * this.config.spacingMax +
-                          this.config.spacingMax + this.config.spacingMin + oSize*2;
-
+        this.visualsParameter = visualsParameter;
         this.scene.background = colors.backgroundColor;
 
-        //Setup objects of the Scene
-        if(visualsParameter.hilly <= this.config.makePlane){
-            this.geometry   = new THREE.PlaneGeometry(oSize*2, oSize*2);
-        }else if(visualsParameter.hilly > this.config.makePlane && visualsParameter.hilly <= this.config.makeTriangle){
-            this.geometry   = new THREE.CircleGeometry(oSize, 30);
-        }else{
-            this.geometry   = new THREE.CircleGeometry(oSize, 3);
-        }
-
-        this.materialA   = new THREE.MeshBasicMaterial({color: colors.colorB});
-        this.materialB   = new THREE.MeshBasicMaterial({color: colors.colorA});
-        this.materialA.side = THREE.DoubleSide;
-        this.materialB.side = THREE.DoubleSide;
-
-
-        if( visualsParameter.brightness < 0.5){
-            this.materialA.blending      = THREE.AdditiveBlending;
-            this.materialB.blending      = THREE.AdditiveBlending;
-        }
-
-
-        /* Color mode
-        // adjust blending if background is to bright
-        if ( visualsParameter.brightness <= 0.8){
-            this.materialA.blending      = THREE.AdditiveBlending;
-            this.materialB.blending      = THREE.AdditiveBlending;
-        }else if(visualsParameter.brightness > 0.8){
-            this.materialA.opacity       = 0.7;
-            this.materialA.transparent   = true;
-            this.materialB.opacity       = 0.7;
-            this.materialB.transparent   = true;
-        }
-*/
-
-
-
+        this.oAmount    = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
+        let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
+                          this.config.maxSize + this.config.minSize;
 
         this.groupA = new THREE.Group();
         this.groupB = new THREE.Group();
+        this.groupC = new THREE.Group();
 
-        this.createGrid(this.geometry,
-                        this.materialA,
-                        colors.colorC,
-                        false,
-                        this.config.gridMinX,
-                        this.config.gridMinY,
-                    -1,
-                        oAmount,
-                        spacing,
-                        this.config.gidMaxX,
-                        this.config.gridMinX,
-                        this.groupA);
+        oSize += visualsParameter.hilly*30;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorA, -50, this.groupC);
+        oSize -= visualsParameter.hilly*15;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorB, 0, this.groupB);
+        oSize -= visualsParameter.hilly*15;
+        this.createCircles(oSize, visualsParameter.urban, colors.colorC, 10, this.groupA);
 
-        this.createGrid(this.geometry,
-                        this.materialB,
-                        colors.colorC,
-                    false,
-                    this.config.gridMinX + this.config.offset,
-                    this.config.gridMinY + this.config.offset,
-                    0,
-                        oAmount,
-                        spacing,
-                    this.config.gidMaxX + this.config.offset,
-                    this.config.gridMinX + this.config.offset,
-                        this.groupB);
+        this.groupB.rotateZ(60 * Math.PI / 180);
+        this.groupC.rotateZ(120 * Math.PI / 180);
 
-
-        this.scene.add(this.groupA, this.groupB);
+        this.scene.add(this.groupA, this.groupB, this.groupC);
     }
 
-    createGrid(geometry, material, colorOutline, createOutline, posX, posY, posZ, oAmount, spacing, maxX, minX, group){
-        let outlineMaterial = new THREE.MeshBasicMaterial( { color: colorOutline} );
+    createCircles(oSize, urban, color, z, group){
+        this.geometry  = new THREE.CircleGeometry(oSize, 30);
+        this.material  = new THREE.MeshBasicMaterial({color: color, opacity: 0.7});
 
+        // adjust blending if background is to bright
+        if(this.colorMode === 'color'){
+            if ( this.visualsParameter.brightness <= 0.8){
+                this.material.blending      = THREE.AdditiveBlending;
+                this.material.transparent   = false;
+            }else if(this.visualsParameter.brightness > 0.8){
+                this.material.blending      = THREE.NormalBlending;
+                this.material.transparent   = true;
+            }
+        }
 
-        for(let i = 0; i < oAmount; i++){
-            let object = new THREE.Mesh(geometry, material);
-            object.renderOrder = 1;
-            object.position.x = posX;
-            object.position.y = posY;
-            object.position.z = posZ;
-
-            group.add(object);
-
-            if(createOutline){
-                let outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
-                outlineMesh.position.x = object.position.x;
-                outlineMesh.position.y = object.position.y;
-                outlineMesh.position.z = object.position.z;
-
-                outlineMesh.scale.multiplyScalar(1.1);
-                group.add(outlineMesh);
+        if(this.colorMode === 'sw'){
+            if(this.visualsParameter.brightness > 0.3){
+                this.material.blennding     = THREE.NormalBlending;
+                this.material.transparent   = true;
+            }else{
+                this.material.blending      = THREE.AdditiveBlending;
+                this.material.transparent   = false;
             }
 
+        }
 
+        let spacing     = this.config.theMoreTheLes * urban * this.config.spacingMax +
+                          this.config.spacingMax + this.config.spacingMin + oSize*2;
+        let angle       = 0;
+        let circleSize  = oSize + spacing/4;
 
+        let angleStep   = Math.floor(oSize*3);
+        while (360 % angleStep !== 0){
+            angleStep++;
+        }
 
+        for(let i = 0; i < this.oAmount; i++){
+            let object = new THREE.Mesh(this.geometry, this.material);
+            object.position.x = Math.cos(angle * Math.PI / 180) * circleSize;
+            object.position.y = Math.sin(angle * Math.PI / 180) * circleSize;
+            object.position.z = z;
+            angle += angleStep;
+            group.add(object);
 
-            posX += spacing;
-            if(posX > maxX){
-                posX = minX;
-                posY += spacing;
+            if(angle >= 360){
+                angle = 0;
+                circleSize += spacing;
             }
         }
     }
 
     onRender(audio, avg){
-        this.groupA.position.x = Math.cos(this.angle) * 15;
-        this.groupA.position.y = Math.sin(this.angle) * 15;
-        this.groupB.position.x = Math.cos(-this.angle) * 15;
-        this.groupB.position.y = Math.sin(-this.angle) * 15;
-
-        //Reverse after beat
-        if(audio > 0.8 && audio > this.lastAudio) {
-            this.lastAudio = audio;
-            this.normalSpeed = -this.normalSpeed
-        }
-        this.angle      += this.normalSpeed * avg;
-        this.lastAudio  -= 0.01;
+        this.groupA.rotateZ(audio * 0.03);
+        this.groupB.rotateZ(- audio * 0.03);
+        this.groupC.rotateZ(avg * 0.02);
 
 
-        // Rotate Objects
-        if(avg > 0.25 && this.timeOut < 0){
-            this.rotate   = true;
-            this.timeOut  = 500;
+        this.groupA.position.z = Math.cos(this.angle) * 10;
+        this.groupB.position.z = Math.cos(this.angle +1 ) * 10;
+        this.groupC.position.z = Math.cos(this.angle + 2) * 30;
 
-        }
-        if(this.rotate && this.currentDegree <= this.targetDegree){
-            let array = this.groupA.children;
-            array.forEach(element => {
-                if(element instanceof THREE.Mesh){
-                    element.rotateZ(avg * Math.PI / 180);
-                }
-            });
-            array = this.groupB.children;
-            array.forEach(element => {
-                if(element instanceof THREE.Mesh){
-                    element.rotateZ(-avg * Math.PI / 180);
-                }
-            })
-
-            this.currentDegree += avg;
-
-
-        }else if(this.currentDegree >= this.targetDegree){
-            this.rotate = false;
-            this.currentDegree = 0;
-        }
-
-        this.timeOut --;
-
-        /*
-        this.groupB.position.z = Math.cos(this.angleB) * 40;
-        this.groupB.position.x = Math.cos(this.angleB) * 15;
-        this.groupB.position.y = Math.cos(this.angleB) * 15;
-        this.angleB += this.normalSpeedB * avg;
-*/
-
+        this.angle += this.normalspeedZ * avg;
     }
 
     delete(){
-        this.scene.remove(this.groupA);
-        this.scene.remove(this.groupB);
+        while (this.scene.children.length > 0){
+            this.scene.remove(this.scene.children[0]);
+        }
         this.geometry.dispose();
-        this.materialA.dispose();
-        this.materialB.dispose();
-        this.groupA = null;
-        this.groupB = null;
+        this.material.dispose();
     }
 }

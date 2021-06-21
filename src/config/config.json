@@ -76,21 +76,12 @@
       "maxBlur":            0.49
     },
 
+
     "sceneA":
-    { "maxAmount":          20,
-      "minAmount":          3,
-      "maxSize":            20,
-      "minSize":            25,
-      "theMoreTheLes":      -1,
-      "maxVertices":        30
-
-    },
-
-    "sceneB":
     { "maxAmount":          800,
       "minAmount":          100,
-      "maxSize":            20,
-      "minSize":            5,
+      "maxSize":            25,
+      "minSize":            8,
       "spacingMax":         20,
       "spacingMin":         3,
       "theMoreTheLes":      -1,
@@ -99,10 +90,10 @@
       "gridMinX":           -300,
       "gidMaxX":            300,
       "gridMinY":           -150,
-      "offset":             5
+      "offset":             10
     },
 
-    "sceneC":
+    "sceneB":
     { "maxAmount":          400,
       "minAmount":          20,
       "maxSize":            15,
@@ -113,6 +104,26 @@
       "offsetMax":          20,
       "offsetMin":          0
 
+    },
+
+    "sceneC":
+    { "maxAmount":          1300,
+      "minAmount":          600,
+      "maxSize":            4,
+      "minSize":            2,
+      "theMoreTheLes":      -1,
+      "makePlane":          0.3,
+      "makeTriangle":       0.7
+    },
+
+    "sceneD":
+    { "maxAmount":          1300,
+      "minAmount":          600,
+      "maxSize":            4,
+      "minSize":            2,
+      "theMoreTheLes":      -1,
+      "makePlane":          0.3,
+      "makeTriangle":       0.7
     }
   }
 
