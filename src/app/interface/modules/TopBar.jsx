@@ -1,5 +1,6 @@
 import React                                from 'react';
 import                                           '../../../css/module/TopBar.css';
+import fscreen                              from 'fscreen';
 
 import {ReactComponent as SvgLogo}          from '../../../img/logo.svg';
 import {ReactComponent as SvgSettings}      from '../../../img/settings.svg';
@@ -14,21 +15,25 @@ export class TopBar extends React.Component{
         }
     }
 
-    componentDidMount() {
-
-    }
-
     openFullscreen(){
-        this.setState({
-            fullscreen: true
-        })
+        let element = document.documentElement;
+        if (fscreen.fullscreenEnabled) {
+            fscreen.requestFullscreen(element);
+
+            this.setState({
+                fullscreen: true
+            });
+        }
     }
 
     closeFullscreen(){
+        if (fscreen.fullscreenEnabled) {
+            fscreen.exitFullscreen();
 
-        this.setState({
-            fullscreen: false
-        })
+            this.setState({
+                fullscreen: false
+            });
+        }
     }
 
     changeView(){

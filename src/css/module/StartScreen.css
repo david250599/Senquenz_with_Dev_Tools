@@ -39,3 +39,10 @@
 
     filter:     blur(10px);
 }
+
+.legal{
+    position:   absolute;
+    bottom:     2px;
+    left:       50%;
+    transform:  translate(-80px ,0);
+}

@@ -1,0 +1,14 @@
+.legalBlock{
+    width:  160px;
+    height: 20px;
+}
+
+.legalBlock a{
+    font-size: 13px;
+    color:              #000000;
+    text-decoration:    none;
+}
+
+.legalBlock a:hover{
+    color: #E41A43;
+}

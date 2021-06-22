@@ -9,6 +9,7 @@ import {Button}                         from '../components/Button';
 import {ReactComponent as SvgCross}     from '../../../img/cross.svg';
 import {ReactComponent as SvgFqHigh}    from '../../../img/frequenz_high.svg';
 import {ReactComponent as SvgFqLow}     from '../../../img/frequenz_low.svg';
+import {Legal} from "../components/Legal";
 
 
 export class Settings extends React.PureComponent{
@@ -96,7 +97,7 @@ export class Settings extends React.PureComponent{
                     onChange    = {(event) => this.props.eventHandler(event)}
                 />
 
-
+                <Legal className = "legal"/>
             </div>
 
 

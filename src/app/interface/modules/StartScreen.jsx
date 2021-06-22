@@ -3,8 +3,10 @@ import {Background}                         from '../components/Background';
 import {Dialog}                             from '../components/Dialog';
 import {ReactComponent as SvgLogo}          from '../../../img/logo.svg';
 import {Button}                             from '../components/Button';
+import {Legal}                              from '../components/Legal';
 
 import                                           '../../../css/module/StartScreen.css';
+
 
 
 
@@ -90,7 +92,7 @@ export class StartScreen extends React.PureComponent{
                                             /> : ''}
 
 
-
+            <Legal className = "legal"/>
             </div>
         )
     }

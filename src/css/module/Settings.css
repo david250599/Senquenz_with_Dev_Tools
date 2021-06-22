@@ -154,7 +154,12 @@
     grid-row: 15 /16;
 }
 
-
+.legal{
+    position:   absolute;
+    bottom:     2px;
+    left:       50%;
+    transform:  translate(-80px ,0);
+}
 
 
 
