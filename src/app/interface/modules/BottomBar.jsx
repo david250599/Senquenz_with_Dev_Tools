@@ -2,6 +2,7 @@ import React                            from 'react';
 import                                       '../../../css/module/BottomBar.css';
 
 import {ReactComponent as SvgPlay}      from '../../../img/play.svg';
+import {ReactComponent as SvgPause}     from '../../../img/pause.svg';
 import {ReactComponent as SvgUpVote}    from '../../../img/upvote.svg';
 import {ReactComponent as SvgDownVote}  from '../../../img/downvote.svg';
 import {WaveformVisualizer}             from '../../audio/WaveformVisualizer';
@@ -36,7 +37,11 @@ export class BottomBar extends React.Component{
                 <div className = "gradientBottom">
                     <div className = "iconsBottom">
                     <div className = "downVote"><SvgDownVote/></div>
-                    <div className = "play"><SvgPlay/></div>
+                    <div className = "play"
+                         onClick   = {(event) => this.props.eventHandler(event)}
+                    >
+                        {this.props.play? <SvgPlay/> : <SvgPause/>}
+                    </div>
                     <div className = "upVote"><SvgUpVote/></div>
                 </div>
                 </div>
@@ -48,8 +53,6 @@ export class BottomBar extends React.Component{
                                             height      ={this.frequency.clientHeight}
                         /> : ''}
                 </div>
-
-
             </div>
         )
     }

@@ -4,10 +4,13 @@ export class SceneB {
     constructor(config) {
         this.config       = config;
         this.scene        = new THREE.Scene();
-        this.colorMode    = 'color';
+        this.colorMode    = 'sw';
 
         this.angle        = 0;
         this.normalspeedZ = 0.2;
+        this.angleC        = 0;
+        this.normalspeedC = 0.1;
+
     }
 
     load(visualsParameter, colors){
@@ -94,9 +97,10 @@ export class SceneB {
 
         this.groupA.position.z = Math.cos(this.angle) * 10;
         this.groupB.position.z = Math.cos(this.angle +1 ) * 10;
-        this.groupC.position.z = Math.cos(this.angle + 2) * 30;
+        this.groupC.position.z = Math.cos(this.angleC) * 50;
 
         this.angle += this.normalspeedZ * avg;
+        this.angleC += this.normalspeedC * avg;
     }
 
     delete(){

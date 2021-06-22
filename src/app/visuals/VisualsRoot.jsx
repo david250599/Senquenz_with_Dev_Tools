@@ -253,9 +253,11 @@ export class VisualsRoot extends React.Component {
     }
 
     startAnimationLoop = () => {
-        this.allScenes[this.currentScene].onRender(this.props.speed, this.props.avg);
+        if(this.props.play){
+            this.allScenes[this.currentScene].onRender(this.props.speed, this.props.avg);
 
-        this.composer.render();
+            this.composer.render();
+        }
 
         this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
     };

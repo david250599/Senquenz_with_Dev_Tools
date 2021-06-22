@@ -45,6 +45,7 @@ export class App extends React.PureComponent {
             locationDetection:  c_settings.locationDetection,
             partyMode:          c_settings.partyMode,
             projectionMode:     c_settings.projectionMode,
+            play:               true,
 
             //Location
             currentLocation: {
@@ -68,6 +69,7 @@ export class App extends React.PureComponent {
                 urban:              0.5,
                 structureSize:      0.5,
             },
+
 
             visualsMount:       false,
             speed:              c_visuals_data.speed,
@@ -123,22 +125,39 @@ export class App extends React.PureComponent {
                 }else{
                     this.setState({
                         locationDetection: false
-                    })
+                    });
                 }
 
             }else{
                 this.setState({
                     [event.target.name] : event.target.checked
-                })
+                });
             }
         }
 
         if(event.target.type === 'range'){
             this.setState({
                 [event.target.name]: parseFloat(event.target.value)
-            })
+            });
         }
 
+        if(event.target.id === 'play'){
+            this.setState((state) => ({
+                play:   !state.play
+            }));
+            if(this.state.audio){
+                this.stopMicrophone();
+            }
+        }
+
+        if(event.target.id === 'pause'){
+            this.setState((state) => ({
+                play:   !state.play
+            }));
+            if(!this.state.audio){
+                this.getMicrophone();
+            }
+        }
     }
 
     // open & close the settings sidebar
@@ -146,7 +165,7 @@ export class App extends React.PureComponent {
         this.setState(prevState =>{
             let visibleSettings = !prevState.visibleSettings;
             return {visibleSettings}
-        })
+        });
     }
 
     // Hide the interface when mouse does not move for a certain amount of time
@@ -453,6 +472,8 @@ export class App extends React.PureComponent {
                 <BottomBar
                     audioData           = {this.state.waveAudioData}
                     audio               = {this.state.audio}
+                    play                = {this.state.play}
+                    eventHandler        = {(event) => this.handleInputEvent(event)}
                 />
 
                 <DevelopInfo
@@ -473,6 +494,7 @@ export class App extends React.PureComponent {
                                 <VisualsRoot
                                     className           = "visualsRoot"
                                     visualsParameter    = {this.state.visualsParameter}
+                                    play                = {this.state.play}
                                     speed               = {this.state.speed}
                                     avg                 = {this.state.avg}
                                     config              = {c_visuals_data}

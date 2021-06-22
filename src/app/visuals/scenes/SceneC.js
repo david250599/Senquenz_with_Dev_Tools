@@ -10,8 +10,11 @@ export class SceneC {
 
         this.timeOut        = 0;
         this.rotate         = false;
+        this.reset          = false;
         this.targetDegree   = 90;
         this.currentDegree  = 0;
+        this.switch         = false;
+        this.timeoutSwitch  = 150;
     }
 
     load(visualsParameter, colors){
@@ -113,12 +116,12 @@ export class SceneC {
             upPoints.push( new THREE.Vector2( -1 - thickness,  -1));
         }
 
-        let downShape = new THREE.Shape(downPoints);
-        let upShape   = new THREE.Shape(upPoints);
+        this.downShape = new THREE.Shape(downPoints);
+        this.upShape   = new THREE.Shape(upPoints);
 
         let extrudeSettings = { depth: depth, bevelEnabled: false};
-        this.geometrydown = new THREE.ExtrudeGeometry( downShape, extrudeSettings);
-        this.geometryup   = new THREE.ExtrudeGeometry( upShape, extrudeSettings);
+        this.geometrydown = new THREE.ExtrudeGeometry( this.downShape, extrudeSettings);
+        this.geometryup   = new THREE.ExtrudeGeometry( this.upShape, extrudeSettings);
 
         let posX = -200;
         let posY = -100;
@@ -157,12 +160,16 @@ export class SceneC {
 
     onRender(audio, avg){
 
-        // Rotate Objects
-        if(avg > 0.25 && this.timeOut < 0){
+        // Rotate objects
+        if(avg > 0.3 && this.timeOut < 0){
             this.rotate   = true;
             this.timeOut  = 500;
 
         }
+        if(this.currentDegree === this.targetDegree){
+            this.reset = true;
+        }
+
         if(this.rotate && this.currentDegree <= this.targetDegree){
             let array = this.groupA.children;
             array.forEach(element => {
@@ -178,14 +185,52 @@ export class SceneC {
             })
 
             this.currentDegree += avg;
+            if(Math.round(this.currentDegree) >= this.targetDegree){
+                this.currentDegree = this.targetDegree;
+            }
+        }
 
-
-        }else if(this.currentDegree >= this.targetDegree){
+        if(this.reset){
+            this.reset  = false;
             this.rotate = false;
             this.currentDegree = 0;
         }
 
         this.timeOut --;
+
+        // Beat
+        let extrudeSettings, newGeometry, array = [];
+
+        if(audio < 0.1 && this.timeoutSwitch < 0){
+            this.switch =! this.switch;
+            this.timeoutSwitch = 150;
+        }
+
+        if(this.switch){
+            extrudeSettings = { depth: -audio, bevelEnabled: false};
+            newGeometry = new THREE.ExtrudeGeometry( this.upShape, extrudeSettings);
+            array = this.groupA.children;
+            array.forEach(element => {
+                if(element instanceof THREE.Mesh){
+                    element.geometry = newGeometry;
+                }
+            });
+        }else{
+            extrudeSettings = { depth: audio, bevelEnabled: false};
+            newGeometry = new THREE.ExtrudeGeometry( this.downShape, extrudeSettings);
+            array = this.groupB.children;
+            array.forEach(element => {
+                if(element instanceof THREE.Mesh){
+                    element.geometry = newGeometry;
+                }
+            });
+        }
+        this.timeoutSwitch--;
+
+
+
+
+
 
     }
 
