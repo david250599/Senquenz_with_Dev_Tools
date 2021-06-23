@@ -1,5 +1,5 @@
 import React                from 'react';
-import                           '../css/style.css';
+import                           '../css/app.css';
 import SunCalc              from 'suncalc';
 
 
@@ -15,6 +15,7 @@ import {VisualsRoot}        from './visuals/VisualsRoot';
 
 // config
 import config               from '../config/config.json';
+import {ms} from "three/examples/jsm/loaders/ifc/web-ifc-api";
 
 // link the configuration data
 const c_interface          = config.interface;
@@ -37,6 +38,7 @@ export class App extends React.PureComponent {
             start:              false,
             visibleSettings:    c_interface.visibleSettings,
             visibleInterface:   c_interface.visibleInterface,
+            showInterfaceCom:   true,
             visibleVisuals:     c_interface.visibleVisuals,
 
             //Settings
@@ -178,11 +180,17 @@ export class App extends React.PureComponent {
     // Show and hide the interface components
     hideInterface(){
         if(!this.state.visibleSettings){
-            this.setState({ visibleInterface: false });
+            this.setState({
+                visibleInterface: false,
+                showInterfaceCom: false
+            });
         }
     }
     showInterface(){
         this.setState({ visibleInterface: true });
+        window.setTimeout(() => this.setState({
+            showInterfaceCom: true
+        }), 500);
     }
 
 
@@ -447,6 +455,7 @@ export class App extends React.PureComponent {
             <div className="interface" id={this.state.visibleInterface ? null : 'fadeOut'}>
                 <TopBar
                     openSettings        = {() => this.toggleSettings()}
+                    showInterfaceCom    = {this.state.showInterfaceCom}
                 />
                 <Settings
                     config              = {c_settings}
@@ -474,7 +483,10 @@ export class App extends React.PureComponent {
                     audio               = {this.state.audio}
                     play                = {this.state.play}
                     eventHandler        = {(event) => this.handleInputEvent(event)}
+                    showInterfaceCom    = {this.state.showInterfaceCom}
                 />
+
+                {/*}
 
                 <DevelopInfo
                     eventHandler    = {(event) => this.handleDevEvent(event)}
@@ -487,6 +499,7 @@ export class App extends React.PureComponent {
                     visualsMount    = {this.state.visualsParameter.visualsMount}
                     speed           = {this.state.speed}
                 />
+                {*/}
 
             </div>
 

@@ -46,7 +46,7 @@ export class TopBar extends React.Component{
 
     render() {
         return(
-            <div className = "topBar">
+            <div className = "topBar" id={this.props.showInterfaceCom? null: 'hideComponents'}>
                 <div className="logo">
                     <SvgLogo/>
                 </div>

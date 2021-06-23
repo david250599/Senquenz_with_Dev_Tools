@@ -46,3 +46,16 @@
     left:       50%;
     transform:  translate(-80px ,0);
 }
+
+@media (max-width: 600px) {
+
+    .opener{
+        width: 300px;
+        transform: translate(-150px, -115px);
+    }
+
+    .opener p{
+        margin-top: 10px;
+    }
+
+}

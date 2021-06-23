@@ -1,0 +1,88 @@
+
+
+.bodyData{
+    width: 100%;
+    height: 6500px;
+    overflow-y: scroll;
+}
+
+.bodyImprint{
+    width: 100%;
+    height: 100%
+}
+
+.dataContainer{
+    width:      480px;
+    height:     6300px;
+    position:   absolute;
+    top:        80px;
+    left:       50%;
+    transform:  translate(-240px, 0);
+    padding-bottom: 50px;
+}
+
+.imprintContainer{
+    width:      480px;
+    height:     500px;
+    position:   absolute;
+    top:        80px;
+    left:       50%;
+    transform:  translate(-240px, 0);
+}
+
+.logoLegal{
+    background: #000000;
+    height:     40px;
+    width:      100%;
+    position:   absolute;
+}
+
+.logoLegal svg{
+    position:   absolute;
+    left:       5px;
+    top:        3px;
+    width:      180px;
+    height:     40px;
+    fill:       #ffffff;
+}
+
+.logoLegal svg:hover{
+    fill:       #E41A43;
+}
+
+h1{
+    margin-bottom: 10px;
+}
+
+h2{
+    margin-bottom:  5px;
+    margin-top:     20px;
+}
+
+h3{
+    margin-bottom:  5px;
+    margin-top:     20px;
+}
+
+h4{
+    margin-bottom:  5px;
+    margin-top:     20px;
+    font-size:      24px;
+}
+
+@media (max-width: 600px) {
+
+    .imprintContainer{
+        width: 300px;
+        transform:  translate(-150px, 0);
+    }
+
+    .dataContainer{
+        width: 300px;
+        height: 9500px;
+        transform:  translate(-150px, 0);
+    }
+    .bodyData{
+        height: 9500px;
+    }
+}

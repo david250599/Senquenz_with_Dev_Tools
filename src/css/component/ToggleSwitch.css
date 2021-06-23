@@ -66,3 +66,10 @@ input:checked + .thumb:before {
     transform:          translateX(30px);
 }
 
+@media (max-width: 600px) {
+
+    .switchTitle{
+        margin-top: 5px;
+    }
+}
+

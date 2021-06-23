@@ -54,9 +54,11 @@
 
 
 /* Setup Container */
-.sidebar h4 {
+.sidebar h4{
     grid-column:    2 / 5;
     grid-row:       2 / 3;
+    align-self:     end;
+    font-size:      37px;
 }
 
 .sidebar h5{
@@ -161,7 +163,36 @@
     transform:  translate(-80px ,0);
 }
 
+@media (max-width: 600px) {
+    #open{
+        width: 100%;
+    }
 
+    .sidebar{
+        grid-template-columns:  auto 50px 230px 50px auto;
+        grid-template-rows:     repeat(6, 40px) 50px repeat(5, 40px) 100px repeat(4, 40px) auto;
+    }
+
+    .sidebar h4{
+        grid-column:    1 / 6;
+        font-size:      30px;
+        margin-left:    10px;
+    }
+
+    .sidebar h5{
+        font-size:      24px;
+    }
+
+    #closeIcon{
+        grid-column:    4 / 6;
+        margin-right:   10px;
+    }
+
+    .legal{
+        grid-column:    3 / 4;
+        grid-row:       17 / 18;
+    }
+}
 
 
 

@@ -33,7 +33,7 @@ export class BottomBar extends React.Component{
 
     render() {
         return(
-            <div className = "bottomBar">
+            <div className = "bottomBar" id={this.props.showInterfaceCom? null: 'hideComponents'}>
                 <div className = "gradientBottom">
                     <div className = "iconsBottom">
                     <div className = "downVote"><SvgDownVote/></div>

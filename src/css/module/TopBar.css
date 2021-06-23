@@ -58,4 +58,8 @@
     fill:           #E41A43;
 }
 
+#hideComponents *{
+    display:        none;
+}
+
 
