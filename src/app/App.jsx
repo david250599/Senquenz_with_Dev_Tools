@@ -15,7 +15,6 @@ import {VisualsRoot}        from './visuals/VisualsRoot';
 
 // config
 import config               from '../config/config.json';
-import {ms} from "three/examples/jsm/loaders/ifc/web-ifc-api";
 
 // link the configuration data
 const c_interface          = config.interface;
@@ -48,6 +47,7 @@ export class App extends React.PureComponent {
             partyMode:          c_settings.partyMode,
             projectionMode:     c_settings.projectionMode,
             play:               true,
+            changeVisuals:      false,
 
             //Location
             currentLocation: {
@@ -114,25 +114,43 @@ export class App extends React.PureComponent {
 
     //Settings
     handleInputEvent(event){
-        if (event.target.type === 'checkbox'){
-            if (event.target.name === 'microphoneInput'){
-                if (this.state.audio){
+        if (event.target.type === 'checkbox') {
+            if (event.target.name === 'microphoneInput') {
+                if (this.state.audio) {
                     this.stopMicrophone();
+                    this.setState({
+                        play:   false
+                    });
                 } else {
                     this.getMicrophone();
+                    this.setState({
+                        play:   true
+                    });
                 }
-            }else if (event.target.name === 'locationDetection'){
-                if(event.target.checked){
+            } else if (event.target.name === 'locationDetection') {
+                if (event.target.checked) {
                     this.getUserLocation();
-                }else{
+                } else {
                     this.setState({
                         locationDetection: false
                     });
                 }
 
-            }else{
+            } else if (event.target.name === 'projectionMode') {
                 this.setState({
-                    [event.target.name] : event.target.checked
+                    projectionMode: event.target.checked,
+                    changeVisuals: true
+                });
+
+            } else if (event.target.name === 'partyMode') {
+                this.setState({
+                    partyMode: event.target.checked,
+                    changeVisuals: true
+                }, () => this.getGeoData());
+
+            } else {
+                this.setState({
+                    [event.target.name]: event.target.checked
                 });
             }
         }
@@ -237,7 +255,7 @@ export class App extends React.PureComponent {
             console.log('Adjust!: '+ newValue);
             this.setState({
                 micSensitivity: newValue
-            })
+            });
         }
     }
 
@@ -254,6 +272,14 @@ export class App extends React.PureComponent {
             map: map
         })
     }
+
+    // Stop reload of Visuals
+    stopReload(){
+        this.setState({
+            changeVisuals: false
+        })
+    }
+
 
     // Get current user location
     getUserLocation(){
@@ -283,150 +309,169 @@ export class App extends React.PureComponent {
         window.clearTimeout(this.updateGeoData);
         console.log("getGeoData");
 
-        // Get position of sun for brightness parameter
-        let brightness;
-        let currentDate     = new Date();
-        let currentTime     = currentDate.getHours()*60 + currentDate.getMinutes();
+        if(this.state.partyMode){
 
-        let times           = SunCalc.getTimes(currentDate, this.state.currentLocation.lat, this.state.currentLocation.lng);
-        let sunrise         = times.sunrise.getHours() * 60 + times.sunrise.getMinutes();
-        let sunsetStart     = times.sunsetStart.getHours() * 60 + times.sunsetStart.getMinutes();
-        let sunPeak         = ((sunsetStart - sunrise + 60 ) / 2) + sunrise + 60;
-
-        // Boundaries for the daily routine
-        let sunriseStart    = sunrise;
-        let sunriseEnd      = sunrise + c_data_mapping.sunriseMinutes;
-        let morningEnd      = sunPeak - c_data_mapping.middayMinutes;
-        let middayEnd       = sunPeak + c_data_mapping.middayMinutes;
-        let afternoonEnd    = sunsetStart;
-        let sunsetEnd       = sunsetStart + c_data_mapping.sunsetMinutes;
-
-
-        // Map it to the right value
-        if(currentTime >= sunriseStart && currentTime <= sunriseEnd){
-            //Sunrise
-            brightness = this.projectValToInterval(
-                currentTime,
-                sunriseStart,
-                sunriseEnd,
-                c_data_mapping.visualsValMin,
-                c_data_mapping.visualsValMax / 3);
-
-        }else if(currentTime > sunriseEnd && currentTime <= morningEnd){
-            //Morning
-            brightness = this.projectValToInterval(
-                currentTime,
-                sunriseEnd,
-                morningEnd,
-                c_data_mapping.visualsValMax / 3,
-                c_data_mapping.visualsValMax);
-
-        }else if(currentTime > morningEnd && currentTime <= middayEnd){
-            //Midday
-            brightness = c_data_mapping.visualsValMax;
-
-        }else if(currentTime > middayEnd && currentTime <= afternoonEnd){
-            //Afternoon
-            brightness = this.projectValToInterval(
-                currentTime,
-                middayEnd,
-                afternoonEnd,
-                c_data_mapping.visualsValMax,
-                c_data_mapping.visualsValMax / 3
-            );
-
-        }else if(currentTime > afternoonEnd && currentTime <= sunsetEnd){
-            //Sunset
-            brightness = this.projectValToInterval(
-                currentTime,
-                afternoonEnd,
-                sunsetEnd,
-                c_data_mapping.visualsValMax / 3,
-                c_data_mapping.visualsValMin
-            );
+            this.setState({
+                visualsParameter: {
+                    brightness:         (Math.random()+0.01).toFixed(3),
+                    urban:              (Math.random()+0.01).toFixed(3),
+                    water:              (Math.random()+0.01).toFixed(3),
+                    structureSize:      (Math.random()+0.01).toFixed(3),
+                    hilly:              (Math.random()+0.01).toFixed(3)
+                }
+            });
+            console.log('fake Data');
+            //Call again in 20sec
+            this.updateGeoData    = window.setTimeout(() => this.getGeoData(), 20000 );
 
         }else{
-            //Night
-            brightness = c_data_mapping.visualsValMin;
-        }
+            // Normal Mode
+            // Get position of sun for brightness parameter
+            let brightness;
+            let currentDate     = new Date();
+            let currentTime     = currentDate.getHours()*60 + currentDate.getMinutes();
 
-        // Get Information for hilly, urban, water & structureSize parameters
-        //Setup url for TileQueryAPI
-        let streetQuery     =   c_map.queryStreets + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
-        let terrainQuery    =   c_map.queryTerrain + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
+            let times           = SunCalc.getTimes(currentDate, this.state.currentLocation.lat, this.state.currentLocation.lng);
+            let sunrise         = times.sunrise.getHours() * 60 + times.sunrise.getMinutes();
+            let sunsetStart     = times.sunsetStart.getHours() * 60 + times.sunsetStart.getMinutes();
+            let sunPeak         = ((sunsetStart - sunrise + 60 ) / 2) + sunrise + 60;
 
-        let buildingQuery   =   streetQuery + c_map.filterPolyBuilding + c_map.token;
-        let waterQuery      =   streetQuery + c_map.filterPolyWater + c_map.token;
-        let roadQuery       =   streetQuery + c_map.filterLineRoad + c_map.token;
-        let contourQuery    =   terrainQuery + c_map.filterPolyContour + c_map.token;
+            // Boundaries for the daily routine
+            let sunriseStart    = sunrise;
+            let sunriseEnd      = sunrise + c_data_mapping.sunriseMinutes;
+            let morningEnd      = sunPeak - c_data_mapping.middayMinutes;
+            let middayEnd       = sunPeak + c_data_mapping.middayMinutes;
+            let afternoonEnd    = sunsetStart;
+            let sunsetEnd       = sunsetStart + c_data_mapping.sunsetMinutes;
 
-        let queryArray      = [buildingQuery, waterQuery, roadQuery, contourQuery];
 
-        // For parameter mapping
-        let parameter       = [];
+            // Map it to the right value
+            if(currentTime >= sunriseStart && currentTime <= sunriseEnd){
+                //Sunrise
+                brightness = this.projectValToInterval(
+                    currentTime,
+                    sunriseStart,
+                    sunriseEnd,
+                    c_data_mapping.visualsValMin,
+                    c_data_mapping.visualsValMax / 3);
 
-        for (let i = 0; i< queryArray.length; i++) {
-            let response = await fetch(queryArray[i]);
-            if(response.ok){
-                let data = await response.json();
-                let allFeatures = data.features;
-                let density         = [0,0,0,0];
+            }else if(currentTime > sunriseEnd && currentTime <= morningEnd){
+                //Morning
+                brightness = this.projectValToInterval(
+                    currentTime,
+                    sunriseEnd,
+                    morningEnd,
+                    c_data_mapping.visualsValMax / 3,
+                    c_data_mapping.visualsValMax);
 
-                // calculate density
-                if(allFeatures.length > 0){
-                    let distances = [];
+            }else if(currentTime > morningEnd && currentTime <= middayEnd){
+                //Midday
+                brightness = c_data_mapping.visualsValMax;
 
-                    // Get all distances
-                    allFeatures.forEach(feature => {
-                        distances.push(feature.properties.tilequery.distance)
-                    });
+            }else if(currentTime > middayEnd && currentTime <= afternoonEnd){
+                //Afternoon
+                brightness = this.projectValToInterval(
+                    currentTime,
+                    middayEnd,
+                    afternoonEnd,
+                    c_data_mapping.visualsValMax,
+                    c_data_mapping.visualsValMax / 3
+                );
 
-                    // Get maximum distance
-                    let max = Math.max(...distances);
-                    if (max <= 0){
-                        max = 1;
-                    }
-
-                    // calculate density
-                    density[i] = allFeatures.length / max;
-                    }
-
-                // Get rid of to high and to low values by setting dem to min or max
-                // The Value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5 - research
-                // The water Value needs special treatment, because of the less value count it gets multiplied by 100
-                if(i === 1 ){
-                    density[i] = density[i] * c_data_mapping.balancingWater
-                }
-                if(density[i] < c_data_mapping.queryValMin){
-                    density[i] = c_data_mapping.queryValMin;
-                }else if(density[i] > c_data_mapping.queryValMax){
-                    density[i] = c_data_mapping.queryValMax;
-                }
-
-                // Map to geo-parameter from 0.01 to 1
-                parameter.push(this.projectValToInterval(density[i],
-                                                         c_data_mapping.queryValMin,
-                                                         c_data_mapping.queryValMax,
-                                                         c_data_mapping.visualsValMin,
-                                                         c_data_mapping.visualsValMax));
+            }else if(currentTime > afternoonEnd && currentTime <= sunsetEnd){
+                //Sunset
+                brightness = this.projectValToInterval(
+                    currentTime,
+                    afternoonEnd,
+                    sunsetEnd,
+                    c_data_mapping.visualsValMax / 3,
+                    c_data_mapping.visualsValMin
+                );
 
             }else{
-                alert('HTTP-Error: ' + response.status + ', Could not load geodata');
+                //Night
+                brightness = c_data_mapping.visualsValMin;
             }
+
+            // Get Information for hilly, urban, water & structureSize parameters
+            //Setup url for TileQueryAPI
+            let streetQuery     =   c_map.queryStreets + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
+            let terrainQuery    =   c_map.queryTerrain + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
+
+            let buildingQuery   =   streetQuery + c_map.filterPolyBuilding + c_map.token;
+            let waterQuery      =   streetQuery + c_map.filterPolyWater + c_map.token;
+            let roadQuery       =   streetQuery + c_map.filterLineRoad + c_map.token;
+            let contourQuery    =   terrainQuery + c_map.filterPolyContour + c_map.token;
+
+            let queryArray      = [buildingQuery, waterQuery, roadQuery, contourQuery];
+
+            // For parameter mapping
+            let parameter       = [];
+
+            for (let i = 0; i< queryArray.length; i++) {
+                let response = await fetch(queryArray[i]);
+                if(response.ok){
+                    let data = await response.json();
+                    let allFeatures = data.features;
+                    let density         = [0,0,0,0];
+
+                    // calculate density
+                    if(allFeatures.length > 0){
+                        let distances = [];
+
+                        // Get all distances
+                        allFeatures.forEach(feature => {
+                            distances.push(feature.properties.tilequery.distance)
+                        });
+
+                        // Get maximum distance
+                        let max = Math.max(...distances);
+                        if (max <= 0){
+                            max = 1;
+                        }
+
+                        // calculate density
+                        density[i] = allFeatures.length / max;
+                    }
+
+                    // Get rid of to high and to low values by setting dem to min or max
+                    // The Value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5 - research
+                    // The water Value needs special treatment, because of the less value count it gets multiplied by 100
+                    if(i === 1 ){
+                        density[i] = density[i] * c_data_mapping.balancingWater
+                    }
+                    if(density[i] < c_data_mapping.queryValMin){
+                        density[i] = c_data_mapping.queryValMin;
+                    }else if(density[i] > c_data_mapping.queryValMax){
+                        density[i] = c_data_mapping.queryValMax;
+                    }
+
+                    // Map to geo-parameter from 0.01 to 1
+                    parameter.push(this.projectValToInterval(density[i],
+                        c_data_mapping.queryValMin,
+                        c_data_mapping.queryValMax,
+                        c_data_mapping.visualsValMin,
+                        c_data_mapping.visualsValMax));
+
+                }else{
+                    alert('HTTP-Error: ' + response.status + ', Could not load geodata');
+                }
+            }
+
+            this.setState({
+                visualsParameter: {
+                    brightness:         brightness.toFixed(3),
+                    urban:              parameter[0].toFixed(3),
+                    water:              parameter[1].toFixed(3),
+                    structureSize:      parameter[2].toFixed(3),
+                    hilly:              parameter[3].toFixed(3)
+                }
+            });
+
+            //Call again in 5min
+            console.log('real Data');
+            this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
         }
-
-        this.setState({
-            visualsParameter: {
-                brightness:         brightness.toFixed(3),
-                urban:              parameter[0].toFixed(3),
-                water:              parameter[1].toFixed(3),
-                structureSize:      parameter[2].toFixed(3),
-                hilly:              parameter[3].toFixed(3)
-            }
-        });
-
-        //Call again in 5min
-        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
     }
 
 
@@ -487,7 +532,6 @@ export class App extends React.PureComponent {
                 />
 
                 {/*}
-
                 <DevelopInfo
                     eventHandler    = {(event) => this.handleDevEvent(event)}
                     intensity       = {this.state.visualsParameter.intensity}
@@ -501,12 +545,17 @@ export class App extends React.PureComponent {
                 />
                 {*/}
 
+
             </div>
 
+            {/*}
             {this.state.visualsMount?
                                 <VisualsRoot
                                     className           = "visualsRoot"
                                     visualsParameter    = {this.state.visualsParameter}
+                                    projectionMode      = {this.state.projectionMode}
+                                    changeVisuals       = {this.state.changeVisuals}
+                                    stopReload          = {() => this.stopReload()}
                                     play                = {this.state.play}
                                     speed               = {this.state.speed}
                                     avg                 = {this.state.avg}
@@ -515,8 +564,7 @@ export class App extends React.PureComponent {
                                                           this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
                                 />
                                 : ''}
-
-
+            {*/}
 
             {this.state.audio ? <div>
                                 <AudioAnalyser
@@ -527,6 +575,8 @@ export class App extends React.PureComponent {
                                     adjustSensitivity   = {(value) => this.adjustMicSensitivity(value)}
                                     configData          = {c_audio_data}
                                 />
+
+
                     {/*}
                                 <BarVisualizer
                                     className       = "barVisualiser"
@@ -536,6 +586,20 @@ export class App extends React.PureComponent {
                                 </div>
 
                                 : ''}
+
+            <VisualsRoot
+                className           = "visualsRoot"
+                visualsParameter    = {this.state.visualsParameter}
+                projectionMode      = {this.state.projectionMode}
+                changeVisuals       = {this.state.changeVisuals}
+                stopReload          = {() => this.stopReload()}
+                play                = {this.state.play}
+                speed               = {this.state.speed}
+                avg                 = {this.state.avg}
+                config              = {c_visuals_data}
+                projectValToInterval= {(oldVal, oldMin, oldMax, newMin, newMax) =>
+                    this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
+            />
 
         </div>
 

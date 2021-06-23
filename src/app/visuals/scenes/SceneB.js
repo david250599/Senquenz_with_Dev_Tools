@@ -6,14 +6,14 @@ export class SceneB {
         this.scene        = new THREE.Scene();
         this.colorMode    = 'sw';
 
-        this.angle        = 0;
-        this.normalspeedZ = 0.2;
-        this.angleC        = 0;
-        this.normalspeedC = 0.1;
-
     }
 
     load(visualsParameter, colors){
+        this.angle         = 0;
+        this.normalspeedZ  = 0.2;
+        this.angleC        = 0;
+        this.normalspeedC  = 0.1;
+
         this.visualsParameter = visualsParameter;
         this.scene.background = colors.backgroundColor;
 

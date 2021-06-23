@@ -36,13 +36,13 @@ export class BottomBar extends React.Component{
             <div className = "bottomBar" id={this.props.showInterfaceCom? null: 'hideComponents'}>
                 <div className = "gradientBottom">
                     <div className = "iconsBottom">
-                    <div className = "downVote"><SvgDownVote/></div>
+                        {/*}<div className = "downVote"><SvgDownVote/></div> {*/}
                     <div className = "play"
                          onClick   = {(event) => this.props.eventHandler(event)}
                     >
                         {this.props.play? <SvgPlay/> : <SvgPause/>}
                     </div>
-                    <div className = "upVote"><SvgUpVote/></div>
+                        {/*}<div className = "upVote"><SvgUpVote/></div>{*/}
                 </div>
                 </div>
 

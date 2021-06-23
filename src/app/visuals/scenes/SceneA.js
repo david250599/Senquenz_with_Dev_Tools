@@ -5,7 +5,9 @@ export class SceneA {
         this.config         = config;
         this.scene          = new THREE.Scene();
         this.colorMode      = 'sw';
+    }
 
+    load(visualsParameter, colors){
         this.angle          = 0;
         this.normalSpeed    = 0.2;
         this.lastAudio      = 0;
@@ -13,9 +15,7 @@ export class SceneA {
         this.rotate         = false;
         this.targetDegree   = 45;
         this.currentDegree  = 0;
-    }
 
-    load(visualsParameter, colors){
         let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
                           this.config.maxSize + this.config.minSize;

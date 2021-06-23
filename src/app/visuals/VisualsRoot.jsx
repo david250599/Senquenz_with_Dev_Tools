@@ -16,7 +16,7 @@ export class VisualsRoot extends React.Component {
     constructor(props) {
         super(props);
         this.config = props.config;
-        //this.updateScene    = window.setTimeout(() => this.changeScene(), 30000 );
+        this.updateScene    = window.setTimeout(() => this.changeScene(), 30000 );
     }
 
     componentDidMount() {
@@ -37,7 +37,7 @@ export class VisualsRoot extends React.Component {
         window.cancelAnimationFrame(this.requestID);
         window.clearTimeout(this.updateScene);
 
-        this.controls.dispose();
+        //this.controls.dispose();
     }
 
 
@@ -55,7 +55,7 @@ export class VisualsRoot extends React.Component {
         this.camera.position.z = 100;
         this.camera.lookAt(0, 0, 0);
 
-        this.controls = new OrbitControls( this.camera, this.el );
+        //this.controls = new OrbitControls( this.camera, this.el );
 
         // Setup Scenes
         this.allScenes = [
@@ -205,6 +205,9 @@ export class VisualsRoot extends React.Component {
             colorC  = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightness + "%)");
         }
 
+        if(this.props.projectionMode){
+            backgroundColor = new THREE.Color("hsl(0, 0%, 0%)");
+        }
 
         return {backgroundColor, colorA, colorB, colorC}
     }
@@ -227,6 +230,7 @@ export class VisualsRoot extends React.Component {
             this.composer.removePass(this.afterimagePass);
         }
 
+
         //postprocessing (water parameter)
         this.renderPass = new RenderPass(this.allScenes[index].scene, this.camera)
         this.composer.addPass( this.renderPass);
@@ -237,27 +241,35 @@ export class VisualsRoot extends React.Component {
 
     changeScene = () => {
         window.clearTimeout(this.updateScene);
-        let indexNew;
 
-        if(this.currentScene === 1){
-            indexNew = 2;
-        }else{
-            indexNew = 1;
-        }
+        let indexNew = this.nextScene();
 
         this.loadScene(indexNew);
         this.allScenes[this.currentScene].delete();
         this.currentScene   = indexNew;
 
-        this.updateScene    = window.setTimeout(() => this.changeScene(), 40000 );
+        this.updateScene    = window.setTimeout(() => this.changeScene(), 30000 );
+    }
+
+    nextScene(){
+        let indexNew = Math.floor(Math.random()*3);
+        if( indexNew === this.currentScene){
+            indexNew = this.nextScene();
+        }
+        return indexNew
     }
 
     startAnimationLoop = () => {
         if(this.props.play){
             this.allScenes[this.currentScene].onRender(this.props.speed, this.props.avg);
-
             this.composer.render();
         }
+
+        if(this.props.changeVisuals){
+            this.changeScene();
+            this.props.stopReload();
+        }
+
 
         this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
     };

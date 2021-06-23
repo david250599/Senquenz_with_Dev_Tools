@@ -8,6 +8,10 @@ export class SceneC {
         this.colorMode = 'sw';
 
 
+
+    }
+
+    load(visualsParameter, colors){
         this.timeOut        = 0;
         this.rotate         = false;
         this.reset          = false;
@@ -15,10 +19,6 @@ export class SceneC {
         this.currentDegree  = 0;
         this.switch         = false;
         this.timeoutSwitch  = 150;
-    }
-
-    load(visualsParameter, colors){
-
         this.scene.background = colors.backgroundColor;
 
         let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;

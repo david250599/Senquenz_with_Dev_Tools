@@ -45,13 +45,17 @@ export class StartScreen extends React.PureComponent{
         return(
             <div className="startScreen">
                 <Background className="background"/>
+                {/*}
                 <Button
                     id  = "stageThree"
                     onClick = {(event) => this.buttonHandler(event)}
                 />
+                {*/}
                 {this.state.stageOne? <div          className = "opener">
+                    <p>B E T A</p>
                                         <SvgLogo    className = "logoStart"/>
                                         <p>location-based real-time music visualizer</p>
+
                                         <Button
                                             className   = "openerButton"
                                             id          = "stageOne"
