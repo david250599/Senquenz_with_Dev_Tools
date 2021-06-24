@@ -62,4 +62,10 @@
     display:        none;
 }
 
+@media (max-width: 600px) {
+    #fullscreenSVG{
+        display: none;
+    }
+}
+
 

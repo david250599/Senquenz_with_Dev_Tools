@@ -23,7 +23,7 @@ export class Impressum extends React.PureComponent{
                     <h2>Kontakt</h2>
                     <p>Telefon: +49 176 81658326<br />
                         E-Mail: hello@senquenz.de</p>
-
+                    <p><br/></p>
                     <p>Quelle: <a href="https://www.e-recht24.de/impressum-generator.html">https://www.e-recht24.de/impressum-generator.html</a></p>
                 </div>
             </div>

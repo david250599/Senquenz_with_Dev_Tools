@@ -54,7 +54,7 @@ export class TopBar extends React.Component{
                     <div onClick={this.props.openSettings}>
                         <SvgSettings/>
                     </div>
-                    <div onClick={() => this.changeView()}>
+                    <div onClick={() => this.changeView()} id = "fullscreenSVG">
                         {this.state.fullscreen? <SvgMinimize/>: <SvgFullScreen/>}
                     </div>
                 </div>

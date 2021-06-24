@@ -22,5 +22,9 @@ button:active{
     background:     #820E25;
 }
 
+button:focus{
+    background:     #D6D6D6;
+}
+
 
 

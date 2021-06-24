@@ -1,9 +1,11 @@
+#overflow{
 
+}
 
 .bodyData{
-    width: 100%;
-    height: 6500px;
     overflow-y: scroll;
+    width:      100%;
+    height:     fit-content;
 }
 
 .bodyImprint{

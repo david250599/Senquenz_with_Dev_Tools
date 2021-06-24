@@ -30,9 +30,6 @@ export class App extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
-        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
-
         this.state = {
             start:              false,
             visibleSettings:    c_interface.visibleSettings,
@@ -107,13 +104,19 @@ export class App extends React.PureComponent {
 
     async start(){
         await this.getGeoData();
+
+        this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
+        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration);
+
         this.setState({
-            start: true
+            start:          true,
+            changeVisuals:  true
         })
     }
 
     //Settings
-    handleInputEvent(event){
+    async handleInputEvent(event){
+        // Switches
         if (event.target.type === 'checkbox') {
             if (event.target.name === 'microphoneInput') {
                 if (this.state.audio) {
@@ -155,12 +158,24 @@ export class App extends React.PureComponent {
             }
         }
 
+        // Buttons
+        if(event.target.type === 'submit'){
+            if(event.target.className === 'buttonSetLocation'){
+                await this.getGeoData();
+                this.setState({
+                    changeVisuals: true
+                });
+            }
+        }
+
+        // Slider
         if(event.target.type === 'range'){
             this.setState({
                 [event.target.name]: parseFloat(event.target.value)
             });
         }
 
+        // Icons
         if(event.target.id === 'play'){
             this.setState((state) => ({
                 play:   !state.play
@@ -493,7 +508,6 @@ export class App extends React.PureComponent {
                     microphoneInput         = {this.state.microphoneInput}
                     locationDetection       = {this.state.locationDetection}
                     eventHandler            = {(event) => this.handleInputEvent(event)}
-
                 />
             }
 
@@ -514,7 +528,6 @@ export class App extends React.PureComponent {
                     locationDetection   = {this.state.locationDetection}
                     currentLocation     = {this.state.currentLocation}
                     setLocation         = {(la, ln, z) => this.setLocation(la, ln, z)}
-                    getGeoData          = {() => this.getGeoData()}
                     getMap              = {(map) => this.getMap(map)}
 
                     partyMode           = {this.state.partyNode}
@@ -543,8 +556,8 @@ export class App extends React.PureComponent {
                     visualsMount    = {this.state.visualsParameter.visualsMount}
                     speed           = {this.state.speed}
                 />
-                {*/}
 
+{*/}
 
             </div>
 
@@ -564,7 +577,7 @@ export class App extends React.PureComponent {
                                                           this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
                                 />
                                 : ''}
-            {*/}
+{*/}
 
             {this.state.audio ? <div>
                                 <AudioAnalyser
@@ -584,22 +597,27 @@ export class App extends React.PureComponent {
                                 />
                     {*/}
                                 </div>
+                                : ''
+            }
 
-                                : ''}
+            {this.state.start ?
+                <VisualsRoot
+                    className           = "visualsRoot"
+                    visualsParameter    = {this.state.visualsParameter}
+                    projectionMode      = {this.state.projectionMode}
+                    changeVisuals       = {this.state.changeVisuals}
+                    stopReload          = {() => this.stopReload()}
+                    play                = {this.state.play}
+                    speed               = {this.state.speed}
+                    avg                 = {this.state.avg}
+                    config              = {c_visuals_data}
+                    projectValToInterval= {(oldVal, oldMin, oldMax, newMin, newMax) =>
+                        this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
+                />
+                : ''
+            }
 
-            <VisualsRoot
-                className           = "visualsRoot"
-                visualsParameter    = {this.state.visualsParameter}
-                projectionMode      = {this.state.projectionMode}
-                changeVisuals       = {this.state.changeVisuals}
-                stopReload          = {() => this.stopReload()}
-                play                = {this.state.play}
-                speed               = {this.state.speed}
-                avg                 = {this.state.avg}
-                config              = {c_visuals_data}
-                projectValToInterval= {(oldVal, oldMin, oldMax, newMin, newMax) =>
-                    this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
-            />
+
 
         </div>
 

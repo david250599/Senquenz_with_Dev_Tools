@@ -59,7 +59,7 @@
   },
 
   "visuals":
-  { "speed":                0.5,
+  { "speed":                0.1,
     "colors":
     { "hueRange":           360,
       "dataMin":            0.01,

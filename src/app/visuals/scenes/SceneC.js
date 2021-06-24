@@ -6,9 +6,6 @@ export class SceneC {
         this.config    = config;
         this.scene     = new THREE.Scene();
         this.colorMode = 'sw';
-
-
-
     }
 
     load(visualsParameter, colors){

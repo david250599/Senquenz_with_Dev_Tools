@@ -5,11 +5,12 @@ import {ToggleSwitch}                   from '../components/ToggleSwitch';
 import {Slider}                         from '../components/Slider';
 import {Map}                            from '../components/Map';
 import {Button}                         from '../components/Button';
+import {LegalLinks}                     from '../components/LegalLinks';
 
 import {ReactComponent as SvgCross}     from '../../../img/cross.svg';
 import {ReactComponent as SvgFqHigh}    from '../../../img/frequenz_high.svg';
 import {ReactComponent as SvgFqLow}     from '../../../img/frequenz_low.svg';
-import {LegalLinks} from "../components/LegalLinks";
+
 
 
 export class Settings extends React.PureComponent{
@@ -65,7 +66,7 @@ export class Settings extends React.PureComponent{
                 {this.props.locationDetection? '' :     <Button
                                                                 className = "buttonSetLocation"
                                                                 name      = "SET LOCATION"
-                                                                onClick   = {()=> this.props.getGeoData()}
+                                                                onClick   = {(event)=> this.props.eventHandler(event)}
                                                         />}
 
                 <Map
