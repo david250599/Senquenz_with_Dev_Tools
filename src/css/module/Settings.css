@@ -157,15 +157,15 @@
 }
 
 .legal{
-    position:   absolute;
-    bottom:     2px;
-    left:       50%;
-    transform:  translate(-80px ,0);
+    grid-column:    3 / 4;
+    grid-row:       16 /17;
+    justify-self:   center;
+    align-self:     end;
 }
 
 @media (max-width: 600px) {
     #open{
-        width: 100%;
+        width:      100%;
     }
 
     .sidebar{

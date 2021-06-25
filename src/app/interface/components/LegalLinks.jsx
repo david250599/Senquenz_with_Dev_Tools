@@ -1,5 +1,4 @@
 import React  from 'react';
-import {Link} from 'react-router-dom';
 import             '../../../css/component/LegalLinks.css';
 
 
@@ -9,8 +8,8 @@ render() {
     return(
         <div className = {this.props.className}>
             <p className = "legalBlock">
-                <Link to = "/Impressum" target = "_blank">Impressum</Link> |
-                <Link to = "/Datenschutz" target = "_blank"> Datenschutz</Link>
+                <a href = "./legal/Impressum" target = "_blank">Impressum</a> |
+                <a href = "./legal/Datenschutz" target = "_blank"> Datenschutz</a>
             </p>
         </div>
     )

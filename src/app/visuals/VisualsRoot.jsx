@@ -15,7 +15,7 @@ import {SceneD}             from './scenes/SceneD';
 export class VisualsRoot extends React.Component {
     constructor(props) {
         super(props);
-        this.config = props.config;
+        this.config         = props.config;
         this.updateScene    = window.setTimeout(() => this.changeScene(), 30000 );
     }
 
@@ -23,6 +23,7 @@ export class VisualsRoot extends React.Component {
         this.rootSetup();
 
         this.currentScene = 2;
+        //this.currentScene = Math.round(Math.random()*3);
         this.loadScene(this.currentScene);
 
         this.startAnimationLoop();
@@ -46,10 +47,10 @@ export class VisualsRoot extends React.Component {
         const height = this.el.clientHeight;
 
         this.camera = new THREE.PerspectiveCamera(
-            75,
+            this.config.camera.fov,
             width / height,
-            0.1,
-            1000
+            this.config.camera.near,
+            this.config.camera.far
         );
 
         this.camera.position.z = 100;
@@ -280,6 +281,7 @@ export class VisualsRoot extends React.Component {
 
         this.renderer.setSize(width, height);
         this.camera.aspect = width / height;
+        this.composer.setSize(width, height);
 
         // Note that after making changes to most of camera properties you have to call
         // .updateProjectionMatrix for the changes to take effect.

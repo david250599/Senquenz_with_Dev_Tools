@@ -229,6 +229,8 @@ export class App extends React.PureComponent {
 
     // Get audio input and handle microphone button
     async getMicrophone(){
+        document.getElementsByTagName("body")[0].style.cursor = 'wait';
+
         const audio = await navigator.mediaDevices.getUserMedia({
             audio: true
         });
@@ -236,6 +238,8 @@ export class App extends React.PureComponent {
             audio:              audio,
             microphoneInput:    true
         });
+
+        document.getElementsByTagName("body")[0].style.cursor = 'default';
     }
     stopMicrophone(){
         this.state.audio.getTracks().forEach(track => track.stop());
@@ -335,11 +339,14 @@ export class App extends React.PureComponent {
                     hilly:              (Math.random()+0.01).toFixed(3)
                 }
             });
-            console.log('fake Data');
+
             //Call again in 20sec
             this.updateGeoData    = window.setTimeout(() => this.getGeoData(), 20000 );
 
         }else{
+
+            document.getElementsByTagName("body")[0].style.cursor = 'wait';
+
             // Normal Mode
             // Get position of sun for brightness parameter
             let brightness;
@@ -483,8 +490,9 @@ export class App extends React.PureComponent {
                 }
             });
 
+            document.getElementsByTagName("body")[0].style.cursor = 'default';
+
             //Call again in 5min
-            console.log('real Data');
             this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
         }
     }

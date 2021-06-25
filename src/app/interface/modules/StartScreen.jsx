@@ -91,7 +91,7 @@ export class StartScreen extends React.PureComponent{
                                             /> : ''}
 
 
-            <LegalLinks className = "legal"/>
+            <LegalLinks className = "legalStart"/>
             </div>
         )
     }

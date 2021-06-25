@@ -62,6 +62,10 @@
     display:        none;
 }
 
+.topBar a{
+    text-decoration: none;
+}
+
 @media (max-width: 600px) {
     #fullscreenSVG{
         display: none;
