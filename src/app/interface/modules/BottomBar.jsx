@@ -3,8 +3,6 @@ import                                       '../../../css/module/BottomBar.css'
 
 import {ReactComponent as SvgPlay}      from '../../../img/play.svg';
 import {ReactComponent as SvgPause}     from '../../../img/pause.svg';
-import {ReactComponent as SvgUpVote}    from '../../../img/upvote.svg';
-import {ReactComponent as SvgDownVote}  from '../../../img/downvote.svg';
 import {WaveformVisualizer}             from '../../audio/WaveformVisualizer';
 
 export class BottomBar extends React.Component{

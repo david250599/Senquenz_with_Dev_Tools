@@ -106,7 +106,7 @@ export class App extends React.PureComponent {
         await this.getGeoData();
 
         this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
-        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration);
+        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), 10000);
 
         this.setState({
             start:          true,
@@ -271,7 +271,6 @@ export class App extends React.PureComponent {
         let newValue = this.state.micSensitivity + value;
 
         if (newValue >= c_settings.sliderSen.min && newValue <= c_settings.sliderSen.max){
-            console.log('Adjust!: '+ newValue);
             this.setState({
                 micSensitivity: newValue
             });
@@ -355,63 +354,90 @@ export class App extends React.PureComponent {
 
             let times           = SunCalc.getTimes(currentDate, this.state.currentLocation.lat, this.state.currentLocation.lng);
             let sunrise         = times.sunrise.getHours() * 60 + times.sunrise.getMinutes();
-            let sunsetStart     = times.sunsetStart.getHours() * 60 + times.sunsetStart.getMinutes();
-            let sunPeak         = ((sunsetStart - sunrise + 60 ) / 2) + sunrise + 60;
+            let sunset          = times.sunset.getHours() * 60 + times.sunset.getMinutes();
+            let sunPeak         = times.solarNoon.getHours() * 60 + times.solarNoon.getMinutes();
 
             // Boundaries for the daily routine
-            let sunriseStart    = sunrise;
-            let sunriseEnd      = sunrise + c_data_mapping.sunriseMinutes;
-            let morningEnd      = sunPeak - c_data_mapping.middayMinutes;
-            let middayEnd       = sunPeak + c_data_mapping.middayMinutes;
-            let afternoonEnd    = sunsetStart;
-            let sunsetEnd       = sunsetStart + c_data_mapping.sunsetMinutes;
+            let boundaries = [];
+            boundaries.push(sunrise);                                       // Sunrise Start
+            boundaries.push(sunrise + c_data_mapping.sunriseMinutes);       // Sunrise End
+            boundaries.push(sunPeak - c_data_mapping.middayMinutes);        // Morning End
+            boundaries.push(sunPeak + c_data_mapping.middayMinutes);        // Midday End
+            boundaries.push(sunset - c_data_mapping.sunsetMinutes);         // Afternoon End
+            boundaries.push(sunset);                                        // Sunset End
 
+            for(let i = 1; i< boundaries.length; i++){
+                if(boundaries[i] < boundaries[i-1]){
+                    boundaries[i] += 1440;
+                }
+            }
+
+
+            /*
+            console.log('SunriseS: ' + boundaries[0] + ', SunriseE: ' + boundaries[1] + ', MorningE: ' + boundaries[2] +
+            ' MiddayE: ' + boundaries[3] + ', AfternoonE: ' + boundaries[4] + ', SunsetE: ' + boundaries[5]);
+
+            console.log('CurrentTime: ' + currentTime);
+
+            console.log('DURATION| Sunrise: ' + (boundaries[1]-boundaries[0]) + ', Morning: ' + (boundaries[2]-boundaries[1]) +
+                ', Midday: ' + (boundaries[3]-boundaries[2]) + ', Afternoon: ' + (boundaries[4]-boundaries[3]) + ', Sunset: ' +
+                (boundaries[5]-boundaries[4]));
+
+
+            console.log('Sunpeak: ' + sunPeak + ', sunrise: ' + sunrise + ', sunset: ' + sunset);
+            */
 
             // Map it to the right value
-            if(currentTime >= sunriseStart && currentTime <= sunriseEnd){
+            if(currentTime >= boundaries[0] && currentTime <= boundaries[1]){
                 //Sunrise
+                console.log('Sunrise');
                 brightness = this.projectValToInterval(
                     currentTime,
-                    sunriseStart,
-                    sunriseEnd,
+                    boundaries[0],
+                    boundaries[1],
                     c_data_mapping.visualsValMin,
                     c_data_mapping.visualsValMax / 3);
 
-            }else if(currentTime > sunriseEnd && currentTime <= morningEnd){
+            }else if(currentTime > boundaries[1] && currentTime <= boundaries[2]){
                 //Morning
+                console.log('Morning');
                 brightness = this.projectValToInterval(
                     currentTime,
-                    sunriseEnd,
-                    morningEnd,
+                    boundaries[1],
+                    boundaries[2],
                     c_data_mapping.visualsValMax / 3,
                     c_data_mapping.visualsValMax);
 
-            }else if(currentTime > morningEnd && currentTime <= middayEnd){
+            }else if(currentTime > boundaries[2] && currentTime <= boundaries[3]){
                 //Midday
+                console.log('Midday');
                 brightness = c_data_mapping.visualsValMax;
 
-            }else if(currentTime > middayEnd && currentTime <= afternoonEnd){
+            }else if(currentTime > boundaries[3] && currentTime <= boundaries[4]){
                 //Afternoon
+                console.log('Afternoon');
                 brightness = this.projectValToInterval(
                     currentTime,
-                    middayEnd,
-                    afternoonEnd,
+                    boundaries[3],
+                    boundaries[4],
                     c_data_mapping.visualsValMax,
                     c_data_mapping.visualsValMax / 3
                 );
 
-            }else if(currentTime > afternoonEnd && currentTime <= sunsetEnd){
+            }else if(currentTime > boundaries[4] && currentTime <= boundaries[5]){
                 //Sunset
+                console.log('Sunset');
                 brightness = this.projectValToInterval(
                     currentTime,
-                    afternoonEnd,
-                    sunsetEnd,
+                    boundaries[4],
+                    boundaries[5],
                     c_data_mapping.visualsValMax / 3,
                     c_data_mapping.visualsValMin
                 );
 
             }else{
                 //Night
+                console.log('Night');
                 brightness = c_data_mapping.visualsValMin;
             }
 
@@ -493,7 +519,8 @@ export class App extends React.PureComponent {
             document.getElementsByTagName("body")[0].style.cursor = 'default';
 
             //Call again in 5min
-            this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration );
+            // c_data_mapping.updateDuration
+            this.updateGeoData    = window.setTimeout(() => this.getGeoData(),  c_data_mapping.updateDuration);
         }
     }
 
@@ -504,9 +531,13 @@ export class App extends React.PureComponent {
         return oldVal * m +n;
     }
 
+    componentWillUnmount() {
+        window.clearTimeout(this.updateGeoData);
+        window.clearTimeout(this.fadeOutInterface);
+    }
 
 
-  render(){
+    render(){
     return (
         <div className="rootContainer" onMouseMove={() => this.handleMouseEvent()}>
 
@@ -552,7 +583,7 @@ export class App extends React.PureComponent {
                     showInterfaceCom    = {this.state.showInterfaceCom}
                 />
 
-                {/*}
+
                 <DevelopInfo
                     eventHandler    = {(event) => this.handleDevEvent(event)}
                     intensity       = {this.state.visualsParameter.intensity}
@@ -565,7 +596,6 @@ export class App extends React.PureComponent {
                     speed           = {this.state.speed}
                 />
 
-{*/}
 
             </div>
 
