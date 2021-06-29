@@ -127,11 +127,9 @@
       "minAmount":          300,
       "maxSize":            6,
       "minSize":            4,
-      "maxProb":            0.4,
-      "minProb":            0.1,
       "theMoreTheLes":      -1,
-      "makePlane":          0.3,
-      "makeTriangle":       0.7
+      "xyWindow":           500,
+      "zWindow":            100
     }
   }
 

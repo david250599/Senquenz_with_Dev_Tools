@@ -10,19 +10,20 @@ import {SceneA}             from './scenes/SceneA';
 import {SceneB}             from './scenes/SceneB';
 import {SceneC}             from './scenes/SceneC';
 import {SceneD}             from './scenes/SceneD';
+import {Test} from "./scenes/test";
 
 
 export class VisualsRoot extends React.Component {
     constructor(props) {
         super(props);
         this.config         = props.config;
-        this.updateScene    = window.setTimeout(() => this.changeScene(), 30000 );
+        //this.updateScene    = window.setTimeout(() => this.changeScene(), 30000 );
     }
 
     componentDidMount() {
         this.rootSetup();
 
-        this.currentScene = 2;
+        this.currentScene = 3;
         //this.currentScene = Math.round(Math.random()*3);
         this.loadScene(this.currentScene);
 
@@ -38,7 +39,7 @@ export class VisualsRoot extends React.Component {
         window.cancelAnimationFrame(this.requestID);
         window.clearTimeout(this.updateScene);
 
-        //this.controls.dispose();
+        this.controls.dispose();
     }
 
 
@@ -56,14 +57,15 @@ export class VisualsRoot extends React.Component {
         this.camera.position.z = 100;
         this.camera.lookAt(0, 0, 0);
 
-        //this.controls = new OrbitControls( this.camera, this.el );
+        this.controls = new OrbitControls( this.camera, this.el );
 
         // Setup Scenes
         this.allScenes = [
             new SceneA(this.config.sceneA),
             new SceneB(this.config.sceneB),
             new SceneC(this.config.sceneC),
-            new SceneD(this.config.sceneD)
+            new SceneD(this.config.sceneD),
+            new Test(this.config.sceneD)
         ]
 
         this.renderer = new THREE.WebGLRenderer();

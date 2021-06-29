@@ -114,7 +114,7 @@ export class App extends React.PureComponent {
         })
     }
 
-    //Settings
+    // Handle all user events
     async handleInputEvent(event){
         // Switches
         if (event.target.type === 'checkbox') {
@@ -599,7 +599,7 @@ export class App extends React.PureComponent {
 
             </div>
 
-            {/*}
+
             {this.state.visualsMount?
                                 <VisualsRoot
                                     className           = "visualsRoot"
@@ -615,7 +615,7 @@ export class App extends React.PureComponent {
                                                           this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
                                 />
                                 : ''}
-{*/}
+
 
             {this.state.audio ? <div>
                                 <AudioAnalyser
@@ -638,6 +638,8 @@ export class App extends React.PureComponent {
                                 : ''
             }
 
+            {/*}
+
             {this.state.start ?
                 <VisualsRoot
                     className           = "visualsRoot"
@@ -654,6 +656,8 @@ export class App extends React.PureComponent {
                 />
                 : ''
             }
+
+            {*/}
 
 
 

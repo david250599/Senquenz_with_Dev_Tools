@@ -10,16 +10,6 @@ export class DevelopInfo extends React.Component{
         return(
             <div className="devInfoPop">
                 <h6>Dev Tools</h6>
-                <p>{'Intensity: '+ this.props.intensity}</p>
-                <Slider
-                className = "devSlider"
-                name      = "intensity"
-                min       = "0.01"
-                max       = "0.99"
-                step      = "0.01"
-                value     = {this.props.intensity}
-                onChange  = {(event) => this.props.eventHandler(event)}
-                />
 
                 <p>{'Brightness: '+ this.props.brightness}</p>
                 <Slider
