@@ -5,49 +5,43 @@ export class SceneD {
     constructor(config) {
         this.config = config;
         this.scene = new THREE.Scene();
-        this.colorMode = 'sw';
-
-
     }
 
     load(visualsParameter, colors){
+        this.timer        = this.config.timer;
+        this.switch       = false;
+        this.xyHalf       = this.config.xyWindow / 2;
+        this.zHalf        = this.config.zWindow / 2;
 
-
-        this.oAmount    = 500;
-        this.oSize      = 3;
-        this.minDist    = 50;
-        this.maxConnect = 10;
-        this.overallConnections = 500;
-
-
-        this.xyHalf = this.config.xyWindow / 2;
-        this.zHalf  = this.config.zWindow / 2;
+        this.oAmount    = visualsParameter.urban * this.config.maxAmount + this.config.minAmount;
+        this.minDist    = visualsParameter.hilly * this.config.maxDist + this.config.minDist;
+        this.maxConnect = visualsParameter.structureSize * this.config.maxConnect + this.config.minConnect;
+        this.overallConnections = visualsParameter.structureSize * this.config.maxOverall + this.config.minOverall;
+        this.oSize      = this.config.size;
 
         this.groupA = new THREE.Group();
 
         // Setup materials
-        if( visualsParameter.water > 0.7 && visualsParameter.brightness > 0.3){
-            this.scene.background = colors.colorA;
-            this.pointMaterial = new THREE.PointsMaterial({
-                color:              colors.colorB,
-                size:               this.oSize,
-                sizeAttenuation:    false
-            });
-            this.lineMaterial = new THREE.LineBasicMaterial({
-                color:  colors.backgroundColor
-            });
+        this.scene.background = colors.backgroundColor;
+        let colorPoint, colorLineA, colorLineB;
+
+        if( visualsParameter.brightness > 0.6 && this.scene.background.r !== 0){
+            colorPoint  = colors.wColor;
+            colorLineA  = colors.wColor;
+            colorLineB  = colors.wColor;
         }else{
-            this.scene.background = colors.backgroundColor;
-            this.pointMaterial = new THREE.PointsMaterial({
-                color:              colors.colorA,
-                size:               this.oSize,
-                sizeAttenuation:    false
-            });
-            this.lineMaterial = new THREE.LineBasicMaterial({
-                color:  colors.colorC
-            });
+            colorPoint  = colors.randomColorA;
+            colorLineA  = colors.wColor;
+            colorLineB  = colors.randomColorA;
         }
 
+        this.pointMaterial = new THREE.PointsMaterial({
+            color:              colorPoint,
+            size:               this.oSize,
+            sizeAttenuation:    false,
+        });
+        this.colorLineA = colorLineA;
+        this.colorLineB = colorLineB;
 
         // Setup points
         this.particlesData      = [];
@@ -69,36 +63,47 @@ export class SceneD {
             });
         }
 
-
+        // Particle system
         this.particlesGeometry  = new THREE.BufferGeometry();
         this.particlesGeometry.setDrawRange(0, this.oAmount);
         this.particlesGeometry.setAttribute('position', new THREE.BufferAttribute(this.particlePositions, 3).setUsage(THREE.DynamicDrawUsage));
 
-        // Particle system
         this.points = new THREE.Points(this.particlesGeometry, this.pointMaterial);
         this.groupA.add(this.points);
 
 
-        // Setup lines this.oAmount * this.oAmount * 3
-        this.linePositions = new Float32Array(this.oAmount * this.overallConnections * 3 * 2);    // oAmount * maxConnect * 3 * 2
-        console.log(this.linePositions.length);
+        // Setup lines
+        this.linePositions  = new Float32Array(this.overallConnections * 3 * 2);
+        this.lineColors     = new Float32Array(this.overallConnections * 3 * 2);
 
         this.lineGeometry = new THREE.BufferGeometry();
         this.lineGeometry.setAttribute( 'position', new THREE.BufferAttribute(this.linePositions, 3).setUsage(THREE.DynamicDrawUsage));
+        this.lineGeometry.setAttribute( 'color', new THREE.BufferAttribute(this.lineColors, 3).setUsage(THREE.DynamicDrawUsage));
+
         this.lineGeometry.computeBoundingSphere();
         this.lineGeometry.setDrawRange(0, 0);
+
+        this.lineMaterial = new THREE.LineBasicMaterial({
+            vertexColors: true
+        });
 
         this.lines = new THREE.LineSegments( this.lineGeometry, this.lineMaterial);
         this.groupA.add(this.lines);
 
-        this.groupA.position.z = -50;
+        this.groupA.position.z = this.config.boxPositionZ;
 
         this.scene.add(this.groupA);
     }
 
-    onRender(audio, avg){
+    onRender(beat, avg){
         let lineIndex       = 0;
+        let colorIndex      = 0;
         let overallConnect  = 0;
+
+        // Offset between the colors
+        let deltaR = this.colorLineB.r - this.colorLineA.r;
+        let deltaG = this.colorLineB.g - this.colorLineA.g;
+        let deltaB = this.colorLineB.b - this.colorLineA.b;
 
         // Reset connections
         for( let i = 0; i < this.oAmount; i++){
@@ -111,10 +116,17 @@ export class SceneD {
             let particleData = this.particlesData[i];
 
 
-            // Move
-            this.particlePositions[i * 3]     += particleData.speed.x * avg * 4;
-            this.particlePositions[i * 3 + 1] += particleData.speed.y * avg * 4;
-            this.particlePositions[i * 3 + 2] += particleData.speed.z * avg * 4;
+            // Move particles
+            if(this.timer < 0){
+                this.switch =! this.switch;
+                this.timer = this.config.timer;
+            }
+            if(this.switch){
+                this.particlePositions[i * 3]     += particleData.speed.x * beat * 2;
+            }else{
+                this.particlePositions[i * 3 + 1] += particleData.speed.y * beat * 2;
+            }
+            this.particlePositions[i * 3 + 2]     += particleData.speed.z * avg * 4;
 
             // Check collision with outside limits
             if( this.particlePositions[i * 3] > this.xyHalf || this.particlePositions[i * 3] < -this.xyHalf){
@@ -123,7 +135,7 @@ export class SceneD {
             if( this.particlePositions[i * 3 + 1] > this.xyHalf || this.particlePositions[i * 3 + 1] < -this.xyHalf){
                 particleData.speed.y = - particleData.speed.y;
             }
-            if( this.particlePositions[i * 3 + 2] > this.zHalf || this.particlePositions[i * 3 + 2] < this.zHalf){
+            if( this.particlePositions[i * 3 + 2] > this.zHalf || this.particlePositions[i * 3 + 2] < -this.zHalf){
                 particleData.speed.z = - particleData.speed.z
             }
 
@@ -157,6 +169,16 @@ export class SceneD {
                             this.linePositions[ lineIndex ++] = this.particlePositions[j * 3 + 1];
                             this.linePositions[ lineIndex ++] = this.particlePositions[j * 3 + 2];
 
+                            let pFactor = dist / this.minDist;
+
+                            this.lineColors[ colorIndex ++] = this.colorLineA.r + deltaR * pFactor;
+                            this.lineColors[ colorIndex ++] = this.colorLineA.g + deltaG * pFactor;
+                            this.lineColors[ colorIndex ++] = this.colorLineA.b + deltaB * pFactor;
+
+                            this.lineColors[ colorIndex ++] = this.colorLineA.r + deltaR * pFactor;
+                            this.lineColors[ colorIndex ++] = this.colorLineA.g + deltaG * pFactor;
+                            this.lineColors[ colorIndex ++] = this.colorLineA.b + deltaB * pFactor;
+
                             overallConnect++;
                         }
                     }
@@ -164,10 +186,12 @@ export class SceneD {
             }
         }
 
-        this.lines.geometry.setDrawRange(0, overallConnect *2);
-        this.lines.geometry.attributes.position.needsUpdate = true;
-        this.points.geometry.attributes.position.needsUpdate = true;
+        this.timer --;
 
+        this.lines.geometry.setDrawRange(0, overallConnect * 2);
+        this.lines.geometry.attributes.position.needsUpdate = true;
+        this.lines.geometry.attributes.color.needsUpdate = true;
+        this.points.geometry.attributes.position.needsUpdate = true;
     }
 
     delete(){

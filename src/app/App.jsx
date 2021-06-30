@@ -62,7 +62,7 @@ export class App extends React.PureComponent {
 
             //Visuals parameter
             visualsParameter: {
-                brightness:         0.0,
+                brightness:         0.5,
                 hilly:              0.5,
                 water:              0.5,
                 urban:              0.5,
@@ -71,8 +71,8 @@ export class App extends React.PureComponent {
 
 
             visualsMount:       false,
-            speed:              c_visuals_data.speed,
-            avg:                0.5
+            beat:               0.0,
+            avg:                0.0
 
         };
     }
@@ -250,8 +250,8 @@ export class App extends React.PureComponent {
     }
 
     // Global audio
-    setAudioData(audioData, wave, speed, avg){
-       let newSpeed = this.projectValToInterval(speed, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+    setAudioData(audioData, wave, beat, avg){
+       let newBeat = this.projectValToInterval(beat, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
        let newAVG   = this.projectValToInterval(avg, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
         if(wave){
             this.setState({
@@ -260,7 +260,7 @@ export class App extends React.PureComponent {
         }else{
             this.setState({
                 barAudioData:   audioData,
-                speed:          newSpeed.toFixed(2),
+                beat:           newBeat.toFixed(2),
                 avg:            newAVG
             });
         }
@@ -268,7 +268,8 @@ export class App extends React.PureComponent {
 
     // Adjust the mic sensitivity
     adjustMicSensitivity(value){
-        let newValue = this.state.micSensitivity + value;
+        let newValue = (parseFloat(this.state.micSensitivity) + value);
+        newValue = newValue.toFixed(2);
 
         if (newValue >= c_settings.sliderSen.min && newValue <= c_settings.sliderSen.max){
             this.setState({
@@ -325,7 +326,6 @@ export class App extends React.PureComponent {
 
     async getGeoData(){
         window.clearTimeout(this.updateGeoData);
-        console.log("getGeoData");
 
         if(this.state.partyMode){
 
@@ -483,7 +483,7 @@ export class App extends React.PureComponent {
                     }
 
                     // Get rid of to high and to low values by setting dem to min or max
-                    // The Value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5 - research
+                    // The value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5 - research
                     // The water Value needs special treatment, because of the less value count it gets multiplied by 100
                     if(i === 1 ){
                         density[i] = density[i] * c_data_mapping.balancingWater
@@ -593,7 +593,7 @@ export class App extends React.PureComponent {
                     urban           = {this.state.visualsParameter.urban}
                     structureSize   = {this.state.visualsParameter.structureSize}
                     visualsMount    = {this.state.visualsParameter.visualsMount}
-                    speed           = {this.state.speed}
+                    speed           = {this.state.beat}
                 />
 
 
@@ -608,13 +608,14 @@ export class App extends React.PureComponent {
                                     changeVisuals       = {this.state.changeVisuals}
                                     stopReload          = {() => this.stopReload()}
                                     play                = {this.state.play}
-                                    speed               = {this.state.speed}
+                                    beat                = {this.state.beat}
                                     avg                 = {this.state.avg}
                                     config              = {c_visuals_data}
                                     projectValToInterval= {(oldVal, oldMin, oldMax, newMin, newMax) =>
                                                           this.projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax)}
                                 />
                                 : ''}
+
 
 
             {this.state.audio ? <div>
@@ -637,7 +638,6 @@ export class App extends React.PureComponent {
                                 </div>
                                 : ''
             }
-
             {/*}
 
             {this.state.start ?
@@ -648,7 +648,7 @@ export class App extends React.PureComponent {
                     changeVisuals       = {this.state.changeVisuals}
                     stopReload          = {() => this.stopReload()}
                     play                = {this.state.play}
-                    speed               = {this.state.speed}
+                    beat                = {this.state.beat}
                     avg                 = {this.state.avg}
                     config              = {c_visuals_data}
                     projectValToInterval= {(oldVal, oldMin, oldMax, newMin, newMax) =>
@@ -656,10 +656,7 @@ export class App extends React.PureComponent {
                 />
                 : ''
             }
-
             {*/}
-
-
 
         </div>
 

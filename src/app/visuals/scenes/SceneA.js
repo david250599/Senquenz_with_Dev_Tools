@@ -4,43 +4,43 @@ export class SceneA {
     constructor(config) {
         this.config         = config;
         this.scene          = new THREE.Scene();
-        this.colorMode      = 'sw';
     }
 
     load(visualsParameter, colors){
         this.angle          = 0;
-        this.normalSpeed    = 0.2;
+        this.normalSpeed    = this.config.speed;
         this.lastAudio      = 0;
-        this.timeOut        = 0;
+        this.timer          = 0;
         this.rotate         = false;
-        this.targetDegree   = 45;
+        this.targetDegree   = this.config.targetDegree;
         this.currentDegree  = 0;
 
         let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
                           this.config.maxSize + this.config.minSize;
         let spacing     = this.config.theMoreTheLes * visualsParameter.urban * this.config.spacingMax +
-                          this.config.spacingMax + this.config.spacingMin + oSize*2;
+                          this.config.spacingMax + this.config.spacingMin + oSize * 2;
 
-        this.scene.background = colors.backgroundColor;
-
+        this.scene.background = colors.backgroundBW;
 
 
         //Setup geometry of the Objects
         if(visualsParameter.hilly <= this.config.makePlane){
-            this.geometry   = new THREE.PlaneGeometry(oSize*2, oSize*2);
+            this.geometry   = new THREE.PlaneGeometry(oSize * 2, oSize * 2);
+
         }else if(visualsParameter.hilly > this.config.makePlane && visualsParameter.hilly <= this.config.makeTriangle){
             this.geometry   = new THREE.CircleGeometry(oSize, 35);
+
         }else{
             this.geometry   = new THREE.CircleGeometry(oSize, 3);
         }
 
-        this.material   = new THREE.MeshBasicMaterial({ color: colors.colorA,
-                                                                  blending: THREE.NoBlending,
-                                                                  opacity: 0.7,
+        this.material   = new THREE.MeshBasicMaterial({ color:        colors.fixColor,
+                                                                  blending:    THREE.NoBlending,
+                                                                  opacity:     0.7,
                                                                   transparent: true});
-
-        if( visualsParameter.brightness < 0.3 && this.colorMode === 'sw'){
+        // Adjust blending on black background
+        if( this.scene.background.r === 0){
             this.material.blending      = THREE.AdditiveBlending;
         }
 
@@ -91,15 +91,15 @@ export class SceneA {
         }
     }
 
-    onRender(audio, avg){
-        this.groupA.position.x = Math.cos(this.angle) * 15;
-        this.groupA.position.y = Math.sin(this.angle) * 15;
-        this.groupB.position.x = Math.cos(-this.angle) * 15;
-        this.groupB.position.y = Math.sin(-this.angle) * 15;
+    onRender(beat, avg){
+        this.groupA.position.x = Math.cos(this.angle) * this.config.sizeCircle;
+        this.groupA.position.y = Math.sin(this.angle) * this.config.sizeCircle;
+        this.groupB.position.x = Math.cos(-this.angle) * this.config.sizeCircle;
+        this.groupB.position.y = Math.sin(-this.angle) * this.config.sizeCircle;
 
         //Reverse after beat
-        if(audio > 0.8 && audio > this.lastAudio) {
-            this.lastAudio = audio;
+        if(beat > 0.8 && beat > this.lastAudio) {
+            this.lastAudio   = beat;
             this.normalSpeed = -this.normalSpeed
         }
         this.angle      += this.normalSpeed * avg;
@@ -107,9 +107,9 @@ export class SceneA {
 
 
         // Rotate Objects
-        if(avg > 0.25 && this.timeOut < 0){
+        if(avg > 0.25 && this.timer < 0){
             this.rotate   = true;
-            this.timeOut  = 500;
+            this.timer    = this.config.timer;
 
         }
         if(this.rotate && this.currentDegree <= this.targetDegree){
@@ -119,6 +119,7 @@ export class SceneA {
                     element.rotateZ(avg * Math.PI / 180);
                 }
             });
+
             array = this.groupB.children;
             array.forEach(element => {
                 if(element instanceof THREE.Mesh){
@@ -130,11 +131,11 @@ export class SceneA {
 
 
         }else if(this.currentDegree >= this.targetDegree){
-            this.rotate = false;
+            this.rotate        = false;
             this.currentDegree = 0;
         }
 
-        this.timeOut --;
+        this.timer --;
 
     }
 

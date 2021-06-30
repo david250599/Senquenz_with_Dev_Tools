@@ -10,7 +10,7 @@
     "autoSensitivity":      true,
     "sliderSen":
     { "min":                0.1,
-      "max":                4,
+      "max":                10,
       "step":               0.1
     },
     "locationDetection":    false,
@@ -49,7 +49,7 @@
   "audioAnalyser":
   { "waveFFT":              2048,
     "barFFT":               32,
-    "micSensitivity":       2,
+    "micSensitivity":       3,
     "updateDuration":       4000,
     "frequencyTopLimit":    240,
     "frequencyLowLimit":    170,
@@ -60,20 +60,23 @@
 
   "visuals":
   { "camera":
-    { "fov":                  75,
-      "near":                 0.1,
-      "far":                  1000
+    { "fov":                75,
+      "near":               0.1,
+      "far":                1000,
+      "positionZ":          100
     },
+
+    "updateDuration":       30000,
 
     "colors":
     { "hueRange":           360,
       "dataMin":            0.01,
       "dataMax":            1,
-      "setBlackAt":         0.1,
-      "colorSatMax":        100,
-      "colorLiMin":         30,
-      "colorLiMax":         70
-
+      "maxSat":             100,
+      "maxLi":              100,
+      "colorLiMin":         20,
+      "colorLiMax":         70,
+      "startColor":         240
     },
 
     "effects":
@@ -94,7 +97,11 @@
       "gridMinX":           -300,
       "gidMaxX":            300,
       "gridMinY":           -150,
-      "offset":             10
+      "offset":             10,
+      "speed":              0.2,
+      "timer":              500,
+      "targetDegree":       45,
+      "sizeCircle":         15
     },
 
     "sceneB":
@@ -105,9 +112,31 @@
       "spacingMax":         40,
       "spacingMin":         4,
       "theMoreTheLes":      -1,
-      "offsetMax":          20,
-      "offsetMin":          0
-
+      "speedAB":            0.2,
+      "speedC":             0.1,
+      "timer":              50,
+      "startDegreeB":       60,
+      "startDegreeC":       120,
+      "sizeFactor":
+      { "a":                15,
+        "b":                15,
+        "c":                30
+      },
+      "positionZ":
+      { "a":                10,
+        "b":                0,
+        "c":                -50
+      },
+      "speedRotate":
+      { "a":                0.03,
+        "b":                0.03,
+        "c":                0.02
+      },
+      "sizeCircle":
+      { "a":                10,
+        "b":                10,
+        "c":                50
+      }
     },
 
     "sceneC":
@@ -119,17 +148,29 @@
       "minProb":            0.1,
       "theMoreTheLes":      -1,
       "makePlane":          0.3,
-      "makeTriangle":       0.7
+      "makeTriangle":       0.7,
+      "timerRotation":    500,
+      "timerSwitch":      150,
+      "targetDegree":       90,
+      "startWindowX":       -200,
+      "endWindowX":         200,
+      "startWindowY":       -100
     },
 
     "sceneD":
-    { "maxAmount":          5000,
-      "minAmount":          300,
-      "maxSize":            6,
-      "minSize":            4,
-      "theMoreTheLes":      -1,
+    { "maxAmount":          800,
+      "minAmount":          200,
+      "size":               3,
+      "maxDist":            80,
+      "minDist":            40,
+      "maxConnect":         8,
+      "minConnect":         2,
+      "maxOverall":         1500,
+      "minOverall":         100,
       "xyWindow":           500,
-      "zWindow":            100
+      "zWindow":            200,
+      "timer":              150,
+      "boxPositionZ":       -80
     }
   }
 

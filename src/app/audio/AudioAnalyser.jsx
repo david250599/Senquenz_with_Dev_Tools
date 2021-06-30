@@ -7,7 +7,7 @@ export class AudioAnalyser extends React.Component{
 
         this.tick               = this.tick.bind(this);
         this.maxValuesGain      = [0];
-        this.speed              = 1;
+        this.beat               = 1;
         this.oldAvg             = 0;
         this.updateGain         = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
 
@@ -48,23 +48,23 @@ export class AudioAnalyser extends React.Component{
         this.analyser.getByteFrequencyData(this.barDataArray);
         this.setState({barAudioData: this.barDataArray});
 
-        // Map lower frequency to speed
+        // Map lower frequency to beat
         let i = 0;
         this.barDataArray.forEach(element => {
             if(element === null && i < 3){
                 this.arrayisNull = true;
             }
             i++;
-        })
+        });
 
         if(!this.arrayisNull){
             let newAvg = (this.barDataArray[0] + this.barDataArray[1] + this.barDataArray[2])/3;
             this.arrayisNull = false;
 
             if(newAvg - this.oldAvg > 60){
-                this.speed = newAvg;
-            }else if(this.speed > 10) {
-                this.speed -= 10;
+                this.beat = newAvg;
+            }else if(this.beat > 10) {
+                this.beat -= 10;
             }
 
             this.oldAvg = newAvg;
@@ -73,10 +73,8 @@ export class AudioAnalyser extends React.Component{
         //overall AVG
         let overallAvg = this.barDataArray.reduce(function (a,b){return a + b})/this.barDataArray.length;
 
-
-
         // Send Values to main component
-        this.props.sendAudioData(this.barDataArray, false, this.speed, overallAvg);
+        this.props.sendAudioData(this.barDataArray, false, this.beat, overallAvg);
 
         // Automatic adjustment
         this.maxValuesGain.push(this.barDataArray[2]);

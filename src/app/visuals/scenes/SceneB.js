@@ -4,18 +4,15 @@ export class SceneB {
     constructor(config) {
         this.config       = config;
         this.scene        = new THREE.Scene();
-        this.colorMode    = 'sw';
-
     }
 
     load(visualsParameter, colors){
         this.angle         = 0;
-        this.normalspeedZ  = 0.2;
+        this.normalspeed   = this.config.speedAB;
         this.angleC        = 0;
-        this.normalspeedC  = 0.1;
-
-        this.visualsParameter = visualsParameter;
-        this.scene.background = colors.backgroundColor;
+        this.normalspeedC  = this.config.speedC;
+        this.direction     = 1;
+        this.timer         = this.config.timer;
 
         this.oAmount    = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
@@ -25,15 +22,32 @@ export class SceneB {
         this.groupB = new THREE.Group();
         this.groupC = new THREE.Group();
 
-        oSize += visualsParameter.hilly*30;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorA, -50, this.groupC);
-        oSize -= visualsParameter.hilly*15;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorB, 0, this.groupB);
-        oSize -= visualsParameter.hilly*15;
-        this.createCircles(oSize, visualsParameter.urban, colors.colorC, 10, this.groupA);
+        let colorA, colorB, colorC;
+        if(visualsParameter.water > 0.9 && colors.backgroundBW.r === 1){
+            this.scene.background = colors.backgroundColor;
+            colorA = colors.wColor;
+            colorB = colors.randomColorA;
+            colorC = colors.randomColorB;
+        }else{
+            this.scene.background = colors.backgroundBW;
+            colorA = colors.randomColorA;
+            colorB = colors.randomColorB;
+            colorC = colors.fixColor;
+        }
 
-        this.groupB.rotateZ(60 * Math.PI / 180);
-        this.groupC.rotateZ(120 * Math.PI / 180);
+        let sizeFactor = this.config.sizeFactor;
+        let positionZ  = this.config.positionZ;
+
+        // initialized in a different order for blending setup
+        oSize += visualsParameter.hilly * sizeFactor.c;
+        this.createCircles(oSize, visualsParameter.urban, colorC, positionZ.c, this.groupC);
+        oSize -= visualsParameter.hilly * sizeFactor.b;
+        this.createCircles(oSize, visualsParameter.urban, colorB, positionZ.b, this.groupB);
+        oSize -= visualsParameter.hilly * sizeFactor.a;
+        this.createCircles(oSize, visualsParameter.urban, colorA, positionZ.a, this.groupA);
+
+        this.groupB.rotateZ(this.config.startDegreeB * Math.PI / 180);
+        this.groupC.rotateZ(this.config.startDegreeC * Math.PI / 180);
 
         this.scene.add(this.groupA, this.groupB, this.groupC);
     }
@@ -43,25 +57,12 @@ export class SceneB {
         this.material  = new THREE.MeshBasicMaterial({color: color, opacity: 0.7});
 
         // adjust blending if background is to bright
-        if(this.colorMode === 'color'){
-            if ( this.visualsParameter.brightness <= 0.8){
-                this.material.blending      = THREE.AdditiveBlending;
-                this.material.transparent   = false;
-            }else if(this.visualsParameter.brightness > 0.8){
-                this.material.blending      = THREE.NormalBlending;
-                this.material.transparent   = true;
-            }
-        }
-
-        if(this.colorMode === 'sw'){
-            if(this.visualsParameter.brightness > 0.3){
-                this.material.blennding     = THREE.NormalBlending;
-                this.material.transparent   = true;
-            }else{
-                this.material.blending      = THREE.AdditiveBlending;
-                this.material.transparent   = false;
-            }
-
+        if(this.scene.background.r === 1 && this.scene.background.g === 1){
+            this.material.blennding     = THREE.NormalBlending;
+            this.material.transparent   = true;
+        }else{
+            this.material.blending      = THREE.AdditiveBlending;
+            this.material.transparent   = false;
         }
 
         let spacing     = this.config.theMoreTheLes * urban * this.config.spacingMax +
@@ -89,17 +90,25 @@ export class SceneB {
         }
     }
 
-    onRender(audio, avg){
-        this.groupA.rotateZ(audio * 0.03);
-        this.groupB.rotateZ(- audio * 0.03);
-        this.groupC.rotateZ(avg * 0.02);
+    onRender(beat, avg){
 
+        if( beat >= 0.6 && this.timer < 0){
+            this.direction = this.direction * -1;
+            this.timer = this.config.timer;
+        }
+        this.timer--;
 
-        this.groupA.position.z = Math.cos(this.angle) * 10;
-        this.groupB.position.z = Math.cos(this.angle +1 ) * 10;
-        this.groupC.position.z = Math.cos(this.angleC) * 50;
+        let speedR = this.config.speedRotate;
+        this.groupA.rotateZ(avg * speedR.a * this.direction);
+        this.groupB.rotateZ(- avg * speedR.b * this.direction);
+        this.groupC.rotateZ(avg * speedR.c);
 
-        this.angle += this.normalspeedZ * avg;
+        let sizeC = this.config.sizeCircle;
+        this.groupA.position.z = Math.cos(this.angle) * sizeC.a;
+        this.groupB.position.z = Math.cos(this.angle + 1 ) * sizeC.b;
+        this.groupC.position.z = Math.cos(this.angleC) * sizeC.c;
+
+        this.angle += this.normalspeed * avg;
         this.angleC += this.normalspeedC * avg;
     }
 

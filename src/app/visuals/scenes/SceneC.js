@@ -5,18 +5,17 @@ export class SceneC {
     constructor(config) {
         this.config    = config;
         this.scene     = new THREE.Scene();
-        this.colorMode = 'sw';
     }
 
     load(visualsParameter, colors){
-        this.timeOut        = 0;
-        this.rotate         = false;
-        this.reset          = false;
-        this.targetDegree   = 90;
-        this.currentDegree  = 0;
-        this.switch         = false;
-        this.timeoutSwitch  = 150;
-        this.scene.background = colors.backgroundColor;
+        this.timerRotation    = 0;
+        this.rotate           = false;
+        this.reset            = false;
+        this.targetDegree     = this.config.targetDegree;
+        this.currentDegree    = 0;
+        this.switch           = false;
+        this.timerSwitch      = this.config.timerSwitch;
+
 
         let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
@@ -27,14 +26,26 @@ export class SceneC {
 
         this.groupA    = new THREE.Group();
         this.groupB    = new THREE.Group();
-        this.materialA = new THREE.MeshBasicMaterial({color: colors.colorA});
-        this.materialB = new THREE.MeshBasicMaterial({color: colors.colorB});
+
+
+        if(visualsParameter.water > 0.9 && colors.backgroundBW.r === 1){
+            this.scene.background = colors.backgroundColor;
+            this.materialA        = new THREE.MeshBasicMaterial({color: colors.wColor});
+            this.materialB        = new THREE.MeshBasicMaterial({color: colors.wColor});
+        }else{
+            this.scene.background = colors.backgroundBW;
+            this.materialA        = new THREE.MeshBasicMaterial({color: colors.randomColorB});
+            this.materialB        = new THREE.MeshBasicMaterial({color: colors.fixColor});
+        }
+
+
+
+
 
         let downPoints = [];
         let upPoints   = [];
         let depth      = 0.1;
         let thickness  = 0.1;
-
 
         // Setup object geometry
         if(visualsParameter.hilly <= this.config.makePlane){
@@ -120,12 +131,12 @@ export class SceneC {
         this.geometrydown = new THREE.ExtrudeGeometry( this.downShape, extrudeSettings);
         this.geometryup   = new THREE.ExtrudeGeometry( this.upShape, extrudeSettings);
 
-        let posX = -200;
-        let posY = -100;
-        let posZ = 0;
+        let maxX = this.config.endWindowX;
+        let minX = this.config.startWindowX;
 
-        let maxX = 200;
-        let minX = -200;
+        let posX = minX;
+        let posY = this.config.startWindowY;
+        let posZ = 0;
 
         for(let i = 0; i < oAmount; i++){
            let line;
@@ -155,13 +166,12 @@ export class SceneC {
         this.scene.add(this.groupA, this.groupB);
     }
 
-    onRender(audio, avg){
+    onRender(beat, avg){
 
         // Rotate objects
-        if(avg > 0.3 && this.timeOut < 0){
-            this.rotate   = true;
-            this.timeOut  = 500;
-
+        if(avg > 0.3 && this.timerRotation < 0){
+            this.rotate           = true;
+            this.timerRotation    = this.config.timerRotation;
         }
         if(this.currentDegree === this.targetDegree){
             this.reset = true;
@@ -193,18 +203,19 @@ export class SceneC {
             this.currentDegree = 0;
         }
 
-        this.timeOut --;
+        this.timerRotation --;
+
 
         // Beat
         let extrudeSettings, newGeometry, array = [];
 
-        if(audio < 0.1 && this.timeoutSwitch < 0){
+        if(beat < 0.1 && this.timerSwitch < 0){
             this.switch =! this.switch;
-            this.timeoutSwitch = 150;
+            this.timerSwitch = this.config.timerSwitch;
         }
 
         if(this.switch){
-            extrudeSettings = { depth: -audio, bevelEnabled: false};
+            extrudeSettings = { depth: -beat, bevelEnabled: false};
             newGeometry = new THREE.ExtrudeGeometry( this.upShape, extrudeSettings);
             array = this.groupA.children;
             array.forEach(element => {
@@ -213,7 +224,7 @@ export class SceneC {
                 }
             });
         }else{
-            extrudeSettings = { depth: audio, bevelEnabled: false};
+            extrudeSettings = { depth: beat, bevelEnabled: false};
             newGeometry = new THREE.ExtrudeGeometry( this.downShape, extrudeSettings);
             array = this.groupB.children;
             array.forEach(element => {
@@ -222,13 +233,7 @@ export class SceneC {
                 }
             });
         }
-        this.timeoutSwitch--;
-
-
-
-
-
-
+        this.timerSwitch--;
     }
 
     delete(){

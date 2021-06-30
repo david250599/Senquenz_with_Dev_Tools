@@ -1,6 +1,8 @@
 
 //////////////////////////////////////////////////////////////
 //Background A
+import * as THREE from "three";
+
 setupColors = () =>{
     const c_colors      = this.config.colors;
     const c_hueRange    = c_colors.hueRange;
@@ -299,5 +301,135 @@ setupColors = (mode) =>{
 
 
 //////////////////////////////////////////////////////////////
+// COLOR SYSTEM 1
+if(mode === "sw"){
+    // Greyscale setup
+    let mainHue = Math.round(this.props.projectValToInterval(
+        brightness,
+        c_colors.dataMin,
+        c_colors.dataMax,
+        0,
+        180
+    ));
 
+    //Background black or white
+    saturation = 0;
+    if(this.props.visualsParameter.brightness > 0.3){
+        lightness = 100;
+    }else{
+        lightness = 0;
+    }
+    backgroundColor = new THREE.Color("hsl("+ mainHue +","+ saturation + "%," + lightness + "%)");
+
+    // Colors in selected Area
+    saturation  = c_colors.colorSatMax;
+    lightness   = Math.round(this.props.projectValToInterval(
+        brightness,
+        c_colors.dataMin,
+        c_colors.dataMax,
+        20,
+        75
+    ));
+
+    // Color A
+    // Map color from selected area to real color wheel
+    let hueA    = this.checkColorAngle(240 + mainHue, c_hueRange);
+    colorA      = new THREE.Color("hsl("+ hueA +","+ saturation + "%," + lightness + "%)");
+
+    // Color B
+    let hueB    = mainHue + Math.round(Math.random()*80);
+    hueB        = this.checkColorAngle(hueB, 180);
+    hueB        = this.checkColorAngle(240 + hueB, c_hueRange);
+    colorB      = new THREE.Color("hsl("+hueB+","+ saturation + "%," + lightness + "%)");
+
+    // Color C
+    let hueC    = mainHue - Math.round(Math.random()*80);
+    hueC        = this.checkColorAngle(hueC, 180);
+    hueC        = this.checkColorAngle(240 + hueC, c_hueRange);
+    colorC      = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightness + "%)");
+
+
+}else if(mode === "color"){
+    // Colorful setup
+    // Background color, selected color area, min = blue, max = yellow
+    let hueBack = Math.round(this.props.projectValToInterval(
+        brightness,
+        c_colors.dataMin,
+        c_colors.dataMax,
+        0,
+        180
+    ));
+
+    // Random staring hue for other colors, inside selected color area
+    let hueRandom         = Math.round(Math.random()*180);
+    // Check if new color is to close to background color
+    if(hueRandom > this.checkColorAngle(hueBack+30, 180) && hueRandom < this.checkColorAngle(hueBack-30, 180)){
+        hueRandom += 30;
+    }
+    hueRandom = this.checkColorAngle(hueRandom, 180);
+
+    //Background
+    if(brightness < c_colors.setBlackAt){
+        saturation  = 0;
+        lightness   = 0;
+    }else{
+        saturation  = c_colors.colorSatMax;
+
+        // red tones less saturation
+        if( brightness <= 0.7 && brightness > 0.3) {
+            saturation = Math.round(this.props.projectValToInterval(
+                brightness,
+                c_colors.dataMin,
+                c_colors.dataMax,
+                80,
+                50
+            ));
+        }
+
+        lightness   = Math.round(this.props.projectValToInterval(
+            brightness,
+            c_colors.dataMin,
+            c_colors.dataMax,
+            10,
+            80
+        ));
+        // Map color from selected area to real color wheel
+        hueBack = this.checkColorAngle(240 + hueBack, c_hueRange);
+    }
+    backgroundColor = new THREE.Color("hsl("+hueBack+","+ saturation + "%," + lightness + "%)");
+
+
+    //Colors
+    saturation = c_colors.colorSatMax;
+    lightness = Math.round(this.props.projectValToInterval(
+        brightness,
+        c_colors.dataMin,
+        c_colors.dataMax,
+        c_colors.colorLiMin,
+        c_colors.colorLiMax
+    ));
+
+    // Color A
+    let hueA    = hueRandom;
+    hueA        = this.checkColorAngle(240 + hueA, c_hueRange);
+    colorA  = new THREE.Color("hsl("+hueA+","+ saturation + "%," + lightness + "%)");
+
+    // Color B
+    let hueB    = hueRandom + 30;
+    hueB        = this.checkColorAngle(hueB, 180);
+    hueB        = this.checkColorAngle(240 + hueB, c_hueRange);
+    colorB  = new THREE.Color("hsl("+hueB+","+ saturation + "%," + lightness + "%)");
+
+    // Color C
+    let hueC    = hueRandom + 60;
+    hueC        = this.checkColorAngle(hueC, 180);
+    hueC        = this.checkColorAngle(240 + hueC, c_hueRange);
+    colorC  = new THREE.Color("hsl("+hueC+","+ saturation + "%," + lightness + "%)");
+}
+
+if(this.props.projectionMode){
+    backgroundColor = new THREE.Color("hsl(0, 0%, 0%)");
+}
+
+return {backgroundColor, colorA, colorB, colorC}
 
