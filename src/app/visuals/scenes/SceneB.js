@@ -23,7 +23,7 @@ export class SceneB {
         this.groupC = new THREE.Group();
 
         let colorA, colorB, colorC;
-        if(visualsParameter.water > 0.9 && colors.backgroundBW.r === 1){
+        if(visualsParameter.water >= 0.5 && colors.backgroundBW.r === 1){
             this.scene.background = colors.backgroundColor;
             colorA = colors.wColor;
             colorB = colors.randomColorA;

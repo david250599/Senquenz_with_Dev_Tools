@@ -11,13 +11,13 @@ export class SceneD {
         this.timer        = this.config.timer;
         this.switch       = false;
         this.xyHalf       = this.config.xyWindow / 2;
-        this.zHalf        = this.config.zWindow / 2;
+        this.zHalf        = this.config.zWindow  / 2;
 
-        this.oAmount    = visualsParameter.urban * this.config.maxAmount + this.config.minAmount;
-        this.minDist    = visualsParameter.hilly * this.config.maxDist + this.config.minDist;
-        this.maxConnect = visualsParameter.structureSize * this.config.maxConnect + this.config.minConnect;
+        this.oAmount            = visualsParameter.urban * this.config.maxAmount + this.config.minAmount;
+        this.minDist            = visualsParameter.hilly * this.config.maxDist + this.config.minDist;
+        this.maxConnect         = visualsParameter.urban * this.config.maxConnect + this.config.minConnect;
         this.overallConnections = visualsParameter.structureSize * this.config.maxOverall + this.config.minOverall;
-        this.oSize      = this.config.size;
+        this.oSize              = this.config.size;
 
         this.groupA = new THREE.Group();
 
@@ -25,9 +25,19 @@ export class SceneD {
         this.scene.background = colors.backgroundColor;
         let colorPoint, colorLineA, colorLineB;
 
-        if( visualsParameter.brightness > 0.6 && this.scene.background.r !== 0){
+        if( visualsParameter.brightness > 0.4 && visualsParameter.water < 0.5 && this.scene.background.r !== 0){
+            if(visualsParameter.brightness >= 0.75){
+                colorPoint  = colors.bColor;
+                colorLineA  = colors.bColor;
+                colorLineB  = colors.bColor;
+            }else{
+                colorPoint  = colors.wColor;
+                colorLineA  = colors.backgroundColor;
+                colorLineB  = colors.wColor;
+            }
+        }else if ( visualsParameter.water >= 0.5 && this.scene.background.r !== 0){
             colorPoint  = colors.wColor;
-            colorLineA  = colors.wColor;
+            colorLineA  = colors.randomColorB;
             colorLineB  = colors.wColor;
         }else{
             colorPoint  = colors.randomColorA;

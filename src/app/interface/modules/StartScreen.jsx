@@ -3,7 +3,7 @@ import {Background}                         from '../components/Background';
 import {Dialog}                             from '../components/Dialog';
 import {ReactComponent as SvgLogo}          from '../../../img/logo.svg';
 import {Button}                             from '../components/Button';
-import {LegalLinks}                              from '../components/LegalLinks';
+import {LegalLinks}                         from '../components/LegalLinks';
 
 import                                           '../../../css/module/StartScreen.css';
 

@@ -9,7 +9,21 @@ export class AudioAnalyser extends React.Component{
         this.maxValuesGain      = [0];
         this.beat               = 1;
         this.oldAvg             = 0;
-        this.updateGain         = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
+
+
+        // config data
+        this.waveFFT            = this.props.configData.waveFFT;
+        this.barFFT             = this.props.configData.barFFT;
+
+        this.minDifference      = this.props.configData.minDifference;
+        this.reduceStep         = this.props.configData.reduceStep;
+
+        this.updateDuration     = this.props.configData.updateDuration;
+        this.frequencyTopLimit  = this.props.configData.frequencyTopLimit;
+        this.frequencyLowLimit  = this.props.configData.frequencyLowLimit
+        this.adjustStep         = this.props.configData.adjustStep
+
+        this.updateGain         = window.setTimeout(() => this.checkGain(), this.updateDuration );
 
         this.state = {
             waveAudioData:  new Uint8Array(0),
@@ -28,7 +42,6 @@ export class AudioAnalyser extends React.Component{
         this.source.connect(this.gain);
         this.gain.connect(this.analyser);
 
-
         this.rafId = requestAnimationFrame(this.tick);
     }
 
@@ -36,45 +49,45 @@ export class AudioAnalyser extends React.Component{
         this.gain.gain.setValueAtTime(this.props.micSensitivity, this.audioContext.currentTime);
 
         //waveform data
-        this.analyser.fftSize = this.props.configData.waveFFT;
+        this.analyser.fftSize = this.waveFFT;
         this.waveDataArray    = new Uint8Array(this.analyser.frequencyBinCount);
         this.analyser.getByteTimeDomainData(this.waveDataArray);
         this.setState({waveAudioData: this.waveDataArray});
-        this.props.sendAudioData(this.waveDataArray, true);
 
         //frequency data
-        this.analyser.fftSize = this.props.configData.barFFT;
+        this.analyser.fftSize = this.barFFT;
         this.barDataArray     = new Uint8Array(this.analyser.frequencyBinCount);
         this.analyser.getByteFrequencyData(this.barDataArray);
         this.setState({barAudioData: this.barDataArray});
 
         // Map lower frequency to beat
-        let i = 0;
-        this.barDataArray.forEach(element => {
-            if(element === null && i < 3){
+        for(let i = 0; i < 3; i++){
+            if(this.barDataArray[i] === null){
                 this.arrayisNull = true;
             }
-            i++;
-        });
+        }
 
         if(!this.arrayisNull){
-            let newAvg = (this.barDataArray[0] + this.barDataArray[1] + this.barDataArray[2])/3;
+            let newAvg       = (this.barDataArray[0] + this.barDataArray[1] + this.barDataArray[2])/3;
             this.arrayisNull = false;
 
-            if(newAvg - this.oldAvg > 60){
+            if(newAvg - this.oldAvg > this.minDifference){
                 this.beat = newAvg;
-            }else if(this.beat > 10) {
-                this.beat -= 10;
+
+            }else if(this.beat > this.reduceStep) {
+                this.beat -= this.reduceStep;
             }
 
             this.oldAvg = newAvg;
         }
 
         //overall AVG
-        let overallAvg = this.barDataArray.reduce(function (a,b){return a + b})/this.barDataArray.length;
+        let overallAvg = this.barDataArray.reduce(function (a,b){
+                                                    return a + b
+                                                 })/this.barDataArray.length;
 
-        // Send Values to main component
-        this.props.sendAudioData(this.barDataArray, false, this.beat, overallAvg);
+        // Send audio values to main component
+        this.props.sendAudioData(this.waveDataArray, this.barDataArray, this.beat, overallAvg);
 
         // Automatic adjustment
         this.maxValuesGain.push(this.barDataArray[2]);
@@ -87,14 +100,17 @@ export class AudioAnalyser extends React.Component{
 
         if(this.props.autoSensitivity){
             let max = Math.max(...this.maxValuesGain);
-            if(max > this.props.configData.frequencyTopLimit){
-                this.props.adjustSensitivity(this.props.configData.adjustStep * -1);
-            }else if(max < this.props.configData.frequencyLowLimit){
-                this.props.adjustSensitivity(this.props.configData.adjustStep);
+
+            if(max > this.frequencyTopLimit){
+                this.props.adjustSensitivity(this.adjustStep * -1);
+
+            }else if(max < this.frequencyLowLimit){
+                this.props.adjustSensitivity(this.adjustStep);
             }
         }
+
         this.maxValuesGain = [0];
-        this.updateGain   = window.setTimeout(() => this.checkGain(), this.props.configData.updateDuration );
+        this.updateGain    = window.setTimeout(() => this.checkGain(), this.updateDuration );
     }
 
     componentWillUnmount() {

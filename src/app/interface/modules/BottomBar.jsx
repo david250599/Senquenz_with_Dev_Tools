@@ -38,7 +38,7 @@ export class BottomBar extends React.Component{
                     <div className = "play"
                          onClick   = {(event) => this.props.eventHandler(event)}
                     >
-                        {this.props.play? <SvgPlay/> : <SvgPause/>}
+                        {this.props.play?  <SvgPause/>: <SvgPlay/>}
                     </div>
                         {/*}<div className = "upVote"><SvgUpVote/></div>{*/}
                 </div>

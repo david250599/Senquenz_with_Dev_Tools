@@ -28,7 +28,7 @@ export class SceneC {
         this.groupB    = new THREE.Group();
 
 
-        if(visualsParameter.water > 0.9 && colors.backgroundBW.r === 1){
+        if(visualsParameter.water >= 0.5 && colors.backgroundBW.r === 1){
             this.scene.background = colors.backgroundColor;
             this.materialA        = new THREE.MeshBasicMaterial({color: colors.wColor});
             this.materialB        = new THREE.MeshBasicMaterial({color: colors.wColor});

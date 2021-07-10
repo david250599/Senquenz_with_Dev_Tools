@@ -4,7 +4,6 @@ import {EffectComposer}     from 'three/examples/jsm/postprocessing/EffectCompos
 import {RenderPass}         from 'three/examples/jsm/postprocessing/RenderPass';
 import {AfterimagePass}     from 'three/examples/jsm/postprocessing/AfterimagePass';
 
-
 import {SceneA}             from './scenes/SceneA';
 import {SceneB}             from './scenes/SceneB';
 import {SceneC}             from './scenes/SceneC';
@@ -22,6 +21,7 @@ export class VisualsRoot extends React.Component {
         this.rootSetup();
 
         this.currentScene = Math.round(Math.random() * (this.allScenes.length - 1));
+
         this.loadScene(this.currentScene);
 
         this.startAnimationLoop();
@@ -64,8 +64,8 @@ export class VisualsRoot extends React.Component {
 
         this.el.appendChild(this.renderer.domElement);
 
-        // Motion blur Effect
-        this.composer = new EffectComposer( this.renderer);
+        // Add effects on rendered image
+        this.composer       = new EffectComposer( this.renderer);
     };
 
     loadScene = (index) => {
@@ -74,15 +74,28 @@ export class VisualsRoot extends React.Component {
 
         if(this.renderPass){
             this.composer.removePass(this.renderPass);
+        }
+        if(this.afterimagePass){
             this.composer.removePass(this.afterimagePass);
         }
+
 
         //postprocessing (water parameter)
         this.renderPass = new RenderPass(this.allScenes[index].scene, this.camera)
         this.composer.addPass( this.renderPass);
-        this.afterimagePass = new AfterimagePass(this.props.visualsParameter.water * this.config.effects.maxBlur +
-                                                this.config.effects.minBlur);
-        this.composer.addPass(this.afterimagePass);
+
+        if(this.props.visualsParameter.water >= 0.5){
+            let strength = this.props.projectValToInterval(
+                this.props.visualsParameter.water,
+                0.5,
+                this.config.effects.dataMax,
+                this.config.effects.minBlur,
+                this.config.effects.maxBlur
+            );
+            this.afterimagePass = new AfterimagePass(strength);
+            this.composer.addPass(this.afterimagePass);
+        }
+
     };
 
     changeScene = () => {

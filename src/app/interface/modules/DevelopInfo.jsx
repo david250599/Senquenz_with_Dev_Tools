@@ -16,7 +16,7 @@ export class DevelopInfo extends React.Component{
                     className = "devSlider"
                     name      = "brightness"
                     min       = "0.01"
-                    max       = "0.99"
+                    max       = "1.0"
                     step      = "0.01"
                     value     = {this.props.brightness}
                     onChange  = {(event) => this.props.eventHandler(event)}
@@ -27,7 +27,7 @@ export class DevelopInfo extends React.Component{
                     className = "devSlider"
                     name      = "hilly"
                     min       = "0.01"
-                    max       = "0.99"
+                    max       = "1.0"
                     step      = "0.01"
                     value     = {this.props.hilly}
                     onChange  = {(event) => this.props.eventHandler(event)}
@@ -38,7 +38,7 @@ export class DevelopInfo extends React.Component{
                     className = "devSlider"
                     name      = "water"
                     min       = "0.01"
-                    max       = "0.99"
+                    max       = "1.0"
                     step      = "0.01"
                     value     = {this.props.water}
                     onChange  = {(event) => this.props.eventHandler(event)}
@@ -49,7 +49,7 @@ export class DevelopInfo extends React.Component{
                     className = "devSlider"
                     name      = "urban"
                     min       = "0.01"
-                    max       = "0.99"
+                    max       = "1.0"
                     step      = "0.01"
                     value     = {this.props.urban}
                     onChange  = {(event) => this.props.eventHandler(event)}
@@ -60,7 +60,7 @@ export class DevelopInfo extends React.Component{
                     className = "devSlider"
                     name      = "structureSize"
                     min       = "0.01"
-                    max       = "0.99"
+                    max       = "1.0"
                     step      = "0.01"
                     value     = {this.props.structureSize}
                     onChange  = {(event) => this.props.eventHandler(event)}
@@ -71,7 +71,7 @@ export class DevelopInfo extends React.Component{
                     className = "devSlider"
                     name      = "speed"
                     min       = "0.01"
-                    max       = "0.99"
+                    max       = "1.0"
                     step      = "0.01"
                     value     = {this.props.speed}
                     onChange  = {(event) => this.props.eventHandler(event)}

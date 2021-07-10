@@ -250,20 +250,15 @@ export class App extends React.PureComponent {
     }
 
     // Global audio
-    setAudioData(audioData, wave, beat, avg){
+    setAudioData(waveAudioData, barAudioData, beat, avg){
        let newBeat = this.projectValToInterval(beat, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
-       let newAVG   = this.projectValToInterval(avg, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
-        if(wave){
-            this.setState({
-                waveAudioData:  audioData
-            });
-        }else{
-            this.setState({
-                barAudioData:   audioData,
-                beat:           newBeat.toFixed(2),
-                avg:            newAVG
-            });
-        }
+       let newAVG  = this.projectValToInterval(avg, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
+       this.setState({
+           waveAudioData:  waveAudioData,
+           barAudioData:   barAudioData,
+           beat:           newBeat.toFixed(2),
+           avg:            newAVG
+       });
     }
 
     // Adjust the mic sensitivity
@@ -373,24 +368,9 @@ export class App extends React.PureComponent {
             }
 
 
-            /*
-            console.log('SunriseS: ' + boundaries[0] + ', SunriseE: ' + boundaries[1] + ', MorningE: ' + boundaries[2] +
-            ' MiddayE: ' + boundaries[3] + ', AfternoonE: ' + boundaries[4] + ', SunsetE: ' + boundaries[5]);
-
-            console.log('CurrentTime: ' + currentTime);
-
-            console.log('DURATION| Sunrise: ' + (boundaries[1]-boundaries[0]) + ', Morning: ' + (boundaries[2]-boundaries[1]) +
-                ', Midday: ' + (boundaries[3]-boundaries[2]) + ', Afternoon: ' + (boundaries[4]-boundaries[3]) + ', Sunset: ' +
-                (boundaries[5]-boundaries[4]));
-
-
-            console.log('Sunpeak: ' + sunPeak + ', sunrise: ' + sunrise + ', sunset: ' + sunset);
-            */
-
             // Map it to the right value
             if(currentTime >= boundaries[0] && currentTime <= boundaries[1]){
                 //Sunrise
-                console.log('Sunrise');
                 brightness = this.projectValToInterval(
                     currentTime,
                     boundaries[0],
@@ -400,7 +380,6 @@ export class App extends React.PureComponent {
 
             }else if(currentTime > boundaries[1] && currentTime <= boundaries[2]){
                 //Morning
-                console.log('Morning');
                 brightness = this.projectValToInterval(
                     currentTime,
                     boundaries[1],
@@ -410,12 +389,10 @@ export class App extends React.PureComponent {
 
             }else if(currentTime > boundaries[2] && currentTime <= boundaries[3]){
                 //Midday
-                console.log('Midday');
                 brightness = c_data_mapping.visualsValMax;
 
             }else if(currentTime > boundaries[3] && currentTime <= boundaries[4]){
                 //Afternoon
-                console.log('Afternoon');
                 brightness = this.projectValToInterval(
                     currentTime,
                     boundaries[3],
@@ -426,7 +403,6 @@ export class App extends React.PureComponent {
 
             }else if(currentTime > boundaries[4] && currentTime <= boundaries[5]){
                 //Sunset
-                console.log('Sunset');
                 brightness = this.projectValToInterval(
                     currentTime,
                     boundaries[4],
@@ -461,7 +437,7 @@ export class App extends React.PureComponent {
                 if(response.ok){
                     let data = await response.json();
                     let allFeatures = data.features;
-                    let density         = [0,0,0,0];
+                    let density         = 0;
 
                     // calculate density
                     if(allFeatures.length > 0){
@@ -479,23 +455,25 @@ export class App extends React.PureComponent {
                         }
 
                         // calculate density
-                        density[i] = allFeatures.length / max;
+                        density = allFeatures.length / max;
                     }
 
                     // Get rid of to high and to low values by setting dem to min or max
-                    // The value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5 - research
-                    // The water Value needs special treatment, because of the less value count it gets multiplied by 100
+                    // The value range goes from 0.001 to 50. It gets set to be from 0.01 to 0.5
+                    // The water Value needs special treatment, because of the less value count
+                    // it gets multiplied by 100
                     if(i === 1 ){
-                        density[i] = density[i] * c_data_mapping.balancingWater
+                        density = density * c_data_mapping.balancingWater
                     }
-                    if(density[i] < c_data_mapping.queryValMin){
-                        density[i] = c_data_mapping.queryValMin;
-                    }else if(density[i] > c_data_mapping.queryValMax){
-                        density[i] = c_data_mapping.queryValMax;
+                    if(density < c_data_mapping.queryValMin){
+                        density = c_data_mapping.queryValMin;
+                    }else if(density > c_data_mapping.queryValMax){
+                        density = c_data_mapping.queryValMax;
                     }
 
                     // Map to geo-parameter from 0.01 to 1
-                    parameter.push(this.projectValToInterval(density[i],
+                    parameter.push(this.projectValToInterval(
+                        density,
                         c_data_mapping.queryValMin,
                         c_data_mapping.queryValMax,
                         c_data_mapping.visualsValMin,
@@ -586,7 +564,6 @@ export class App extends React.PureComponent {
 
                 <DevelopInfo
                     eventHandler    = {(event) => this.handleDevEvent(event)}
-                    intensity       = {this.state.visualsParameter.intensity}
                     brightness      = {this.state.visualsParameter.brightness}
                     hilly           = {this.state.visualsParameter.hilly}
                     water           = {this.state.visualsParameter.water}
@@ -595,6 +572,7 @@ export class App extends React.PureComponent {
                     visualsMount    = {this.state.visualsParameter.visualsMount}
                     speed           = {this.state.beat}
                 />
+
 
 
             </div>
@@ -618,28 +596,19 @@ export class App extends React.PureComponent {
 
 
 
-            {this.state.audio ? <div>
+            {this.state.audio ?
                                 <AudioAnalyser
                                     audio               = {this.state.audio}
-                                    sendAudioData       = {(data, wave, speed, avg) => this.setAudioData(data, wave, speed, avg)}
+                                    sendAudioData       = {(waveData, barData, beat, avg) => this.setAudioData(waveData, barData, beat, avg)}
                                     autoSensitivity     = {this.state.autoSensitivity}
                                     micSensitivity      = {this.state.micSensitivity}
                                     adjustSensitivity   = {(value) => this.adjustMicSensitivity(value)}
                                     configData          = {c_audio_data}
                                 />
-
-
-                    {/*}
-                                <BarVisualizer
-                                    className       = "barVisualiser"
-                                    audioData       = {this.state.barAudioData}
-                                />
-                    {*/}
-                                </div>
                                 : ''
             }
-            {/*}
 
+            {/*}
             {this.state.start ?
                 <VisualsRoot
                     className           = "visualsRoot"
@@ -658,6 +627,7 @@ export class App extends React.PureComponent {
             }
             {*/}
 
+
         </div>
 
     );
@@ -665,5 +635,6 @@ export class App extends React.PureComponent {
 
 
 }
+
 
 

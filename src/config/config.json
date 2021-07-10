@@ -49,7 +49,9 @@
   "audioAnalyser":
   { "waveFFT":              2048,
     "barFFT":               32,
-    "micSensitivity":       3,
+    "minDifference":        60,
+    "reduceStep":           10,
+    "micSensitivity":       4,
     "updateDuration":       4000,
     "frequencyTopLimit":    240,
     "frequencyLowLimit":    170,
@@ -80,8 +82,10 @@
     },
 
     "effects":
-    { "minBlur":            0.5,
-      "maxBlur":            0.49
+    { "dataMin":            0.01,
+      "dataMax":            1,
+      "minBlur":            0.8,
+      "maxBlur":            0.99
     },
 
     "sceneA":
