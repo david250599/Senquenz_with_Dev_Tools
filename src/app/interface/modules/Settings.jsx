@@ -1,3 +1,6 @@
+// Holds all important setting components
+// The events are getting handled in the main component
+
 import React                            from 'react';
 import                                       '../../../css/module/Settings.css';
 
@@ -10,8 +13,6 @@ import {LegalLinks}                     from '../components/LegalLinks';
 import {ReactComponent as SvgCross}     from '../../../img/cross.svg';
 import {ReactComponent as SvgFqHigh}    from '../../../img/frequenz_high.svg';
 import {ReactComponent as SvgFqLow}     from '../../../img/frequenz_low.svg';
-
-
 
 export class Settings extends React.PureComponent{
 

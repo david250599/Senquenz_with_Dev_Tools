@@ -1,3 +1,5 @@
+// Scene A: geometric shapes in a moving grid
+
 import * as THREE from "three";
 
 export class SceneA {
@@ -15,6 +17,7 @@ export class SceneA {
         this.targetDegree   = this.config.targetDegree;
         this.currentDegree  = 0;
 
+        // Mapping of the location data to properties of the visual
         let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
                           this.config.maxSize + this.config.minSize;
@@ -24,7 +27,7 @@ export class SceneA {
         this.scene.background = colors.backgroundBW;
 
 
-        //Setup geometry of the Objects
+        // Setup geometry of the objects depending on height differences
         if(visualsParameter.hilly <= this.config.makePlane){
             this.geometry   = new THREE.PlaneGeometry(oSize * 2, oSize * 2);
 
@@ -47,6 +50,7 @@ export class SceneA {
         this.groupA = new THREE.Group();
         this.groupB = new THREE.Group();
 
+        // Create the objects in a grid
         this.createGrid(this.geometry,
                         this.material,
                         this.config.gridMinX,
@@ -92,12 +96,13 @@ export class SceneA {
     }
 
     onRender(beat, avg){
+        // Rotation of the Elements
         this.groupA.position.x = Math.cos(this.angle) * this.config.sizeCircle;
         this.groupA.position.y = Math.sin(this.angle) * this.config.sizeCircle;
         this.groupB.position.x = Math.cos(-this.angle) * this.config.sizeCircle;
         this.groupB.position.y = Math.sin(-this.angle) * this.config.sizeCircle;
 
-        //Reverse after beat
+        //Reverse rotation after beat over 0.8
         if(beat > 0.8 && beat > this.lastAudio) {
             this.lastAudio   = beat;
             this.normalSpeed = -this.normalSpeed
@@ -106,7 +111,8 @@ export class SceneA {
         this.lastAudio  -= 0.01;
 
 
-        // Rotate Objects
+        // Rotate each object on the z-axis if the avg is high
+        // It will rotate until the target degree is reached
         if(avg > 0.25 && this.timer < 0){
             this.rotate   = true;
             this.timer    = this.config.timer;

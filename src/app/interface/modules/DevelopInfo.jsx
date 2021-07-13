@@ -1,10 +1,11 @@
+// This Dev-Tool can help to understand the how the visuals are generated
+// All relevant parameters can be set through a interface
+
 import React from 'react';
 import '../../../css/DInfo.css';
 import {Slider} from '../components/Slider';
 
 export class DevelopInfo extends React.Component{
-
-
 
     render() {
         return(
@@ -76,7 +77,6 @@ export class DevelopInfo extends React.Component{
                     value     = {this.props.speed}
                     onChange  = {(event) => this.props.eventHandler(event)}
                 />
-
 
                 <button
                         className="devButton"

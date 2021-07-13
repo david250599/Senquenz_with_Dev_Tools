@@ -1,3 +1,6 @@
+// Scene C: Lines
+// inspired by Fernando Serrano - https://threejs.org/examples/#webgl_buffergeometry_drawrange
+
 import * as THREE           from 'three';
 
 
@@ -13,6 +16,7 @@ export class SceneD {
         this.xyHalf       = this.config.xyWindow / 2;
         this.zHalf        = this.config.zWindow  / 2;
 
+        // Mapping of the location data to properties of the visual
         this.oAmount            = visualsParameter.urban * this.config.maxAmount + this.config.minAmount;
         this.minDist            = visualsParameter.hilly * this.config.maxDist + this.config.minDist;
         this.maxConnect         = visualsParameter.urban * this.config.maxConnect + this.config.minConnect;
@@ -25,6 +29,8 @@ export class SceneD {
         this.scene.background = colors.backgroundColor;
         let colorPoint, colorLineA, colorLineB;
 
+        // Setup the colors of the scene
+        // High values at water and brightness are changing the appearance
         if( visualsParameter.brightness > 0.4 && visualsParameter.water < 0.5 && this.scene.background.r !== 0){
             if(visualsParameter.brightness >= 0.75){
                 colorPoint  = colors.bColor;

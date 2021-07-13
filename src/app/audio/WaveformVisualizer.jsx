@@ -1,6 +1,7 @@
 import React from 'react';
 
-
+// Draws the audio diagramm for the bottombar
+// Inspired by Phil Nash - https://www.twilio.com/blog/audio-visualisation-web-audio-api--react
 export class WaveformVisualizer extends React.Component{
 
     constructor(props) {

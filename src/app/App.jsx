@@ -1,3 +1,5 @@
+// Main Component of the application
+
 import React                from 'react';
 import                           '../css/app.css';
 import SunCalc              from 'suncalc';
@@ -31,13 +33,14 @@ export class App extends React.PureComponent {
         super(props);
 
         this.state = {
+            // Start dialogs
             start:              false,
             visibleSettings:    c_interface.visibleSettings,
             visibleInterface:   c_interface.visibleInterface,
             showInterfaceCom:   true,
             visibleVisuals:     c_interface.visibleVisuals,
 
-            //Settings
+            // Settings
             microphoneInput:    c_settings.microphoneInput,
             autoSensitivity:    c_settings.autoSensitivity,
             locationDetection:  c_settings.locationDetection,
@@ -46,7 +49,7 @@ export class App extends React.PureComponent {
             play:               true,
             changeVisuals:      false,
 
-            //Location
+            // Location
             currentLocation: {
                 lat:            Math.random() * c_map.maxLat * 2 - c_map.maxLat,
                 lng:            Math.random() * c_map.maxLng * 2 - c_map.maxLng,
@@ -54,13 +57,15 @@ export class App extends React.PureComponent {
             },
             map:                null,
 
-            //Audio parameter
+            // Audio parameter
             audio:              null,
             waveAudioData:      new Uint8Array(0),
             barAudioData:       new Uint8Array(0),
             micSensitivity:     c_audio_data.micSensitivity,
+            beat:               0.0,
+            avg:                0.0,
 
-            //Visuals parameter
+            // Visuals parameter
             visualsParameter: {
                 brightness:         0.5,
                 hilly:              0.5,
@@ -69,15 +74,13 @@ export class App extends React.PureComponent {
                 structureSize:      0.5,
             },
 
-
-            visualsMount:       false,
-            beat:               0.0,
-            avg:                0.0
+            // Dev tools
+            visualsMount:       false
 
         };
     }
 
-    // Remove later, only Dev
+    // Dev tools, event handler
     handleDevEvent(event){
         if(event.target.type === 'range'){
             if(event.target.name === 'speed'){
@@ -94,7 +97,6 @@ export class App extends React.PureComponent {
 
         }
 
-        //Vorläufig
         if (event.target.name === 'update'){
             this.setState({
                 visualsMount: !this.state.visualsMount
@@ -102,11 +104,13 @@ export class App extends React.PureComponent {
         }
     }
 
+    // Gets called after the last starting dialog
+    // Sets timeouts for interface fade out and
     async start(){
         await this.getGeoData();
 
         this.fadeOutInterface = window.setTimeout(() => this.hideInterface(), c_duration_fadeOut);
-        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), 10000);
+        this.updateGeoData    = window.setTimeout(() => this.getGeoData(), c_data_mapping.updateDuration);
 
         this.setState({
             start:          true,
@@ -114,7 +118,7 @@ export class App extends React.PureComponent {
         })
     }
 
-    // Handle all user events
+    // Handles all user events
     async handleInputEvent(event){
         // Switches
         if (event.target.type === 'checkbox') {
@@ -147,7 +151,7 @@ export class App extends React.PureComponent {
 
             } else if (event.target.name === 'partyMode') {
                 this.setState({
-                    partyMode: event.target.checked,
+                    partyMode:     event.target.checked,
                     changeVisuals: true
                 }, () => this.getGeoData());
 
@@ -176,7 +180,7 @@ export class App extends React.PureComponent {
         }
 
         // Icons
-        if(event.target.id === 'play'){
+        if(event.target.id === 'pause'){
             this.setState((state) => ({
                 play:   !state.play
             }));
@@ -185,7 +189,7 @@ export class App extends React.PureComponent {
             }
         }
 
-        if(event.target.id === 'pause'){
+        if(event.target.id === 'play'){
             this.setState((state) => ({
                 play:   !state.play
             }));
@@ -228,6 +232,7 @@ export class App extends React.PureComponent {
 
 
     // Get audio input and handle microphone button
+    // Inspired by Phil Nash - https://www.twilio.com/blog/audio-visualisation-web-audio-api--react
     async getMicrophone(){
         document.getElementsByTagName("body")[0].style.cursor = 'wait';
 
@@ -250,6 +255,7 @@ export class App extends React.PureComponent {
     }
 
     // Global audio
+    // Mapping of the audio parameter
     setAudioData(waveAudioData, barAudioData, beat, avg){
        let newBeat = this.projectValToInterval(beat, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
        let newAVG  = this.projectValToInterval(avg, c_audio_data.min, c_audio_data.max, c_data_mapping.visualsValMin, c_data_mapping.visualsValMax);
@@ -318,11 +324,12 @@ export class App extends React.PureComponent {
     }
 
 
-
+    // Analyse the current location
     async getGeoData(){
         window.clearTimeout(this.updateGeoData);
 
         if(this.state.partyMode){
+            // Party Mode
 
             this.setState({
                 visualsParameter: {
@@ -413,12 +420,12 @@ export class App extends React.PureComponent {
 
             }else{
                 //Night
-                console.log('Night');
                 brightness = c_data_mapping.visualsValMin;
             }
 
             // Get Information for hilly, urban, water & structureSize parameters
-            //Setup url for TileQueryAPI
+            // Setup url for Mapbox TileQueryAPI
+            // https://docs.mapbox.com/playground/tilequery/
             let streetQuery     =   c_map.queryStreets + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
             let terrainQuery    =   c_map.queryTerrain + this.state.currentLocation.lng + ',' + this.state.currentLocation.lat;
 
@@ -439,7 +446,7 @@ export class App extends React.PureComponent {
                     let allFeatures = data.features;
                     let density         = 0;
 
-                    // calculate density
+                    // calculate density from all found elements
                     if(allFeatures.length > 0){
                         let distances = [];
 
@@ -496,13 +503,12 @@ export class App extends React.PureComponent {
 
             document.getElementsByTagName("body")[0].style.cursor = 'default';
 
-            //Call again in 5min
-            // c_data_mapping.updateDuration
+            // Call again in 5min
             this.updateGeoData    = window.setTimeout(() => this.getGeoData(),  c_data_mapping.updateDuration);
         }
     }
 
-
+    // Helps with mapping, projects a value from a given interval to another
     projectValToInterval(oldVal, oldMin, oldMax, newMin, newMax){
         let m = (newMax - newMin)/(oldMax - oldMin);
         let n = - ( m * oldMin ) + newMin;
@@ -596,7 +602,7 @@ export class App extends React.PureComponent {
 
 
 
-            {this.state.audio ?
+            {this.state.audio ? <div>
                                 <AudioAnalyser
                                     audio               = {this.state.audio}
                                     sendAudioData       = {(waveData, barData, beat, avg) => this.setAudioData(waveData, barData, beat, avg)}
@@ -605,10 +611,17 @@ export class App extends React.PureComponent {
                                     adjustSensitivity   = {(value) => this.adjustMicSensitivity(value)}
                                     configData          = {c_audio_data}
                                 />
+                                <BarVisualizer
+                                    className           = "barVisualiser"
+                                    audioData           = {this.state.barAudioData}
+                                />
+                                </div>
+
                                 : ''
             }
 
             {/*}
+            For normal use
             {this.state.start ?
                 <VisualsRoot
                     className           = "visualsRoot"

@@ -1,3 +1,5 @@
+// Scene C: generated patterns
+
 import * as THREE           from 'three';
 
 
@@ -16,7 +18,7 @@ export class SceneC {
         this.switch           = false;
         this.timerSwitch      = this.config.timerSwitch;
 
-
+        // Mapping of the location data to properties of the visual
         let oAmount     = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
                           this.config.maxSize + this.config.minSize;
@@ -27,7 +29,8 @@ export class SceneC {
         this.groupA    = new THREE.Group();
         this.groupB    = new THREE.Group();
 
-
+        // Setup the colors of the scene
+        // If the water value is to high, the colored background is needed for contrast
         if(visualsParameter.water >= 0.5 && colors.backgroundBW.r === 1){
             this.scene.background = colors.backgroundColor;
             this.materialA        = new THREE.MeshBasicMaterial({color: colors.wColor});
@@ -39,15 +42,12 @@ export class SceneC {
         }
 
 
-
-
-
         let downPoints = [];
         let upPoints   = [];
         let depth      = 0.1;
         let thickness  = 0.1;
 
-        // Setup object geometry
+        // Setup line geometry
         if(visualsParameter.hilly <= this.config.makePlane){
             // Straight
             downPoints.push( new THREE.Vector2( -1,  1));
@@ -124,6 +124,7 @@ export class SceneC {
             upPoints.push( new THREE.Vector2( -1 - thickness,  -1));
         }
 
+        // create objects from paths
         this.downShape = new THREE.Shape(downPoints);
         this.upShape   = new THREE.Shape(upPoints);
 
@@ -168,7 +169,8 @@ export class SceneC {
 
     onRender(beat, avg){
 
-        // Rotate objects
+        // Rotate each object on the z-axis if the avg is high
+        // It will rotate until the target degree is reached
         if(avg > 0.3 && this.timerRotation < 0){
             this.rotate           = true;
             this.timerRotation    = this.config.timerRotation;
@@ -206,7 +208,8 @@ export class SceneC {
         this.timerRotation --;
 
 
-        // Beat
+        // Beat lets the path extrude
+        // Switch between group a and when timer is up and the current beat is low
         let extrudeSettings, newGeometry, array = [];
 
         if(beat < 0.1 && this.timerSwitch < 0){

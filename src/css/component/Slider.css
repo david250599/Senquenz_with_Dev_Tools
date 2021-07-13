@@ -1,4 +1,4 @@
-/* https://www.w3schools.com/howto/howto_js_rangeslider.asp */
+/* Inspired by https://www.w3schools.com/howto/howto_js_rangeslider.asp */
 
 .slider:disabled{
     opacity: 0.2;

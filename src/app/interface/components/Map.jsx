@@ -1,16 +1,17 @@
+// modified example from Mapbox documentation - https://docs.mapbox.com/help/tutorials/use-mapbox-gl-js-with-react/
+// Map needs to be given to the main component to set the map center to the user location
+// Movement on the map calls a function from the main component to set the point position globally accessible
+
 import React    from 'react';
 import               '../../../css/component/Map.css';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import mapboxgl from '!mapbox-gl';
 
-
-
-
 export class Map extends React.PureComponent {
     constructor(props) {
         super(props);
         mapboxgl.accessToken = props.mapToken;
-        this.mapContainer = React.createRef();
+        this.mapContainer    = React.createRef();
     }
 
     componentDidMount() {
@@ -20,7 +21,6 @@ export class Map extends React.PureComponent {
             center:     [this.props.currentLocation.lng, this.props.currentLocation.lat],
             zoom:       this.props.currentLocation.zoom
         });
-
 
         //Move on the map
         this.map.on('move', () => {
@@ -32,7 +32,6 @@ export class Map extends React.PureComponent {
         });
 
         this.props.getMap(this.map);
-
     }
 
     componentWillUnmount() {

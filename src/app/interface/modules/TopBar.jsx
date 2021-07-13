@@ -1,3 +1,7 @@
+// Holds logo and settings button
+// Executes the fullscreen function
+// The Fscreen - Fullscreen API is used for that - https://www.npmjs.com/package/fscreen
+
 import React                                from 'react';
 import                                           '../../../css/module/TopBar.css';
 import fscreen                              from 'fscreen';

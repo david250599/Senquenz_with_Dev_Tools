@@ -46,7 +46,7 @@
         height: 288px;
         transform: translate(-140px, -144px);
 
-        grid-template-rows:     64px repeat(4, 56px);
+        grid-template-rows: 64px repeat(4, 56px);
     }
 
     .dialog p {

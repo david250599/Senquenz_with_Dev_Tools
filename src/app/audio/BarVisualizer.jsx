@@ -1,3 +1,6 @@
+// Draws a bar for each value of the frequency array
+// Helps to get a better feeling for the values
+// Example from Mozilla - https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Visualizations_with_Web_Audio_API
 import React from 'react';
 
 export class BarVisualizer extends React.Component{
@@ -6,8 +9,6 @@ export class BarVisualizer extends React.Component{
         super(props);
 
         this.canvas = React.createRef();
-        this.lowPassArray = [0, 0];
-        this.highPassArray = [0, 0];
 
         this.state = {
             lowPassAvg:     0,
@@ -41,51 +42,6 @@ export class BarVisualizer extends React.Component{
 
             x += barWidth + 1;
         }
-        /*
-        if (audioData.length > 0){
-            const intervalLength   = Math.floor(audioData.length/2);
-            this.lowPassArray      = audioData.slice(0, intervalLength);
-            this.highPassArray     = audioData.slice(intervalLength+1, audioData.length-1);
-
-            this.lowPassAvg        = this.lowPassArray.reduce(function(a, b){ return a +b})/this.lowPassArray.length
-            this.highPassAvg       = this.highPassArray.reduce(function(a, b){ return a +b})/this.highPassArray.length
-            this.overallAvg        = audioData.reduce(function(a, b){ return a +b})/audioData.length
-
-            this.lowMax            = this.lowPassArray.reduce(function(a, b){ return Math.max(a , b);});
-            this.highMax           = this.highPassArray.reduce(function(a, b){ return Math.max(a , b);});
-        }
-
-        if (this.lowPassAvg > this.state.lowPassAvg){
-            this.setState({
-                lowPassAvg: this.lowPassAvg
-            })
-        }
-        if (this.highPassAvg > this.state.highPassAvg){
-            this.setState({
-                highPassAvg: this.highPassAvg
-            })
-        }
-        if (this.overallAvg > this.state.overallAvg){
-            this.setState({
-                overallAvg: this.overallAvg
-            })
-        }
-
-        if (this.lowMax > this.state.lowMax){
-            this.setState({
-                lowMax: this.lowMax
-            })
-        }
-
-        if (this.highMax > this.state.highMax){
-            this.setState({
-                highMax: this.highMax
-            })
-        }
-        */
-
-
-
     }
 
     componentDidUpdate() {
@@ -99,14 +55,7 @@ export class BarVisualizer extends React.Component{
                     width="800"
                     ref={this.canvas}
                 />
-                {/*}
-                <p>{'low: ' + this.state.lowPassAvg + ', max: ' + this.state.lowMax}</p>
-                <p>{'high: ' + this.state.highPassAvg + ', max: ' + this.state.highMax}</p>
-                <p>{'all: ' + this.state.overallAvg}</p>
-                {*/}
-
                 </div>
-
     }
 
 }

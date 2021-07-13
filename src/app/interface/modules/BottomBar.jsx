@@ -1,3 +1,6 @@
+// Shows current audio graph
+// Application can be paused and started
+
 import React                            from 'react';
 import                                       '../../../css/module/BottomBar.css';
 
@@ -34,14 +37,12 @@ export class BottomBar extends React.Component{
             <div className = "bottomBar" id={this.props.showInterfaceCom? null: 'hideComponents'}>
                 <div className = "gradientBottom">
                     <div className = "iconsBottom">
-                        {/*}<div className = "downVote"><SvgDownVote/></div> {*/}
-                    <div className = "play"
-                         onClick   = {(event) => this.props.eventHandler(event)}
-                    >
+                        <div className = "play"
+                             onClick   = {(event) => this.props.eventHandler(event)}
+                        >
                         {this.props.play?  <SvgPause/>: <SvgPlay/>}
+                        </div>
                     </div>
-                        {/*}<div className = "upVote"><SvgUpVote/></div>{*/}
-                </div>
                 </div>
 
                 <div className = "frequency" ref={(input) => { this.frequency = input; }}>

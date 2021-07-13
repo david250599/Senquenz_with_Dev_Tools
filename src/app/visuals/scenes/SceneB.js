@@ -1,3 +1,5 @@
+// Scene B: geometric shapes in a moving circle
+
 import * as THREE from "three";
 
 export class SceneB {
@@ -14,6 +16,7 @@ export class SceneB {
         this.direction     = 1;
         this.timer         = this.config.timer;
 
+        // Mapping of the location data to properties of the visual
         this.oAmount    = visualsParameter.structureSize * this.config.maxAmount + this.config.minAmount;
         let oSize       = this.config.theMoreTheLes * visualsParameter.structureSize * this.config.maxSize +
                           this.config.maxSize + this.config.minSize;
@@ -22,6 +25,8 @@ export class SceneB {
         this.groupB = new THREE.Group();
         this.groupC = new THREE.Group();
 
+        // Setup the colors of the scene
+        // If the water value is to high, the colored background is needed for contrast
         let colorA, colorB, colorC;
         if(visualsParameter.water >= 0.5 && colors.backgroundBW.r === 1){
             this.scene.background = colors.backgroundColor;
@@ -38,7 +43,7 @@ export class SceneB {
         let sizeFactor = this.config.sizeFactor;
         let positionZ  = this.config.positionZ;
 
-        // initialized in a different order for blending setup
+        // Initialized groups in a different order for blending setup
         oSize += visualsParameter.hilly * sizeFactor.c;
         this.createCircles(oSize, visualsParameter.urban, colorC, positionZ.c, this.groupC);
         oSize -= visualsParameter.hilly * sizeFactor.b;
@@ -65,11 +70,13 @@ export class SceneB {
             this.material.transparent   = false;
         }
 
+        // creates objects on a circular path
         let spacing     = this.config.theMoreTheLes * urban * this.config.spacingMax +
                           this.config.spacingMax + this.config.spacingMin + oSize*2;
         let angle       = 0;
         let circleSize  = oSize + spacing/4;
 
+        // The distance in degree between 2 objects needs to be divisible by 360 to have no holes in the final composition
         let angleStep   = Math.floor(oSize*3);
         while (360 % angleStep !== 0){
             angleStep++;
@@ -92,17 +99,20 @@ export class SceneB {
 
     onRender(beat, avg){
 
+        //Reverse rotation after beat over 0.6
         if( beat >= 0.6 && this.timer < 0){
             this.direction = this.direction * -1;
             this.timer = this.config.timer;
         }
         this.timer--;
 
+        // Rotate groups on z-axis
         let speedR = this.config.speedRotate;
         this.groupA.rotateZ(avg * speedR.a * this.direction);
         this.groupB.rotateZ(- avg * speedR.b * this.direction);
         this.groupC.rotateZ(avg * speedR.c);
 
+        // Back and forth on the z-axis
         let sizeC = this.config.sizeCircle;
         this.groupA.position.z = Math.cos(this.angle) * sizeC.a;
         this.groupB.position.z = Math.cos(this.angle + 1 ) * sizeC.b;

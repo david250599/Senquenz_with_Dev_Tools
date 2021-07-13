@@ -1,7 +1,7 @@
+// Holds and implements the Lottie animation
 import React                from 'react';
 import Lottie               from 'react-lottie';
 import * as animationData   from '../../../animation/background.json';
-
 
 export class Background extends React.Component{
 

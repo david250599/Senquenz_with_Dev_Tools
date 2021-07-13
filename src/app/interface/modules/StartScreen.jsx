@@ -1,3 +1,6 @@
+// Handles the start of the application
+// Dialogs navigate through first step settings
+
 import React                                from 'react';
 import {Background}                         from '../components/Background';
 import {Dialog}                             from '../components/Dialog';
@@ -6,9 +9,6 @@ import {Button}                             from '../components/Button';
 import {LegalLinks}                         from '../components/LegalLinks';
 
 import                                           '../../../css/module/StartScreen.css';
-
-
-
 
 export class StartScreen extends React.PureComponent{
     constructor(props) {
@@ -36,10 +36,6 @@ export class StartScreen extends React.PureComponent{
             this.props.start();
         }
     }
-
-
-
-
 
     render() {
         return(
